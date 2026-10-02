@@ -417,6 +417,10 @@ function phoneDigits(value) {
   return String(value || "").replace(/\D/g, "").slice(0, 11);
 }
 
+function loggedInPhone() {
+  try { return phoneDigits(JSON.parse(localStorage.getItem("onmaeul-login"))?.phone); } catch { return ""; }
+}
+
 function formatPhone(value) {
   const digits = phoneDigits(value);
   if (digits.length <= 3) return digits;
@@ -1229,9 +1233,21 @@ function statusClass(status) {
   return "is-neutral";
 }
 
+const noOrderDemoMember = {
+  customerName: "신규회원",
+  phone: "01012341234",
+  email: "newmember@example.com",
+  nicknameCode: "4826",
+  chatNickname: "",
+  addressName: "",
+  address: "",
+  deliveryRequest: "",
+};
+
 function readMemberProfile() {
   let storedMember;
   try { storedMember = JSON.parse(localStorage.getItem("onmaeul-member")); } catch {}
+  const activePhone = loggedInPhone();
   const demoMember = {
     customerName: "홍길동",
     phone: "01012345678",
@@ -1242,17 +1258,21 @@ function readMemberProfile() {
     address: "경기 수원시 영통구 온마을로 27, 101동 101호",
     deliveryRequest: "문 앞에 놓아주세요.",
   };
-  return storedMember
-    ? {
-        ...demoMember,
-        ...storedMember,
-        nicknameCode: storedMember.nicknameCode || storedMember.aliasCode || demoMember.nicknameCode,
-        chatNickname: storedMember.chatNickname || "",
-        addressName: storedMember.addressName || "",
-        address: storedMember.address || "",
-        deliveryRequest: storedMember.deliveryRequest || "",
-      }
+  const baseMember = activePhone === noOrderDemoMember.phone ? noOrderDemoMember : activePhone && activePhone !== demoMember.phone
+    ? { ...noOrderDemoMember, customerName: "", phone: activePhone, email: "", nicknameCode: "" }
     : demoMember;
+  const member = storedMember && (!activePhone || phoneDigits(storedMember.phone) === activePhone) ? storedMember : null;
+  return member
+    ? {
+        ...baseMember,
+        ...member,
+        nicknameCode: member.nicknameCode || member.aliasCode || baseMember.nicknameCode,
+        chatNickname: member.chatNickname || "",
+        addressName: member.addressName || "",
+        address: member.address || "",
+        deliveryRequest: member.deliveryRequest || "",
+      }
+    : baseMember;
 }
 
 function writeMemberProfile(member) {
@@ -1260,7 +1280,7 @@ function writeMemberProfile(member) {
 }
 
 function ongoingOrders() {
-  return mockOrders.filter((order) => !["픽업완료", "배달완료"].includes(order.processStatus) && order.cancelRefundStatus !== "취소승인");
+  return mockOrders.filter((order) => phoneDigits(order.phone) === loggedInPhone() && !["픽업완료", "배달완료"].includes(order.processStatus) && order.cancelRefundStatus !== "취소승인");
 }
 
 function myPageFrame(content, current = "orders") {
@@ -1662,7 +1682,7 @@ function renderQuickOrderLookup() {
     quickLookupCode = code;
     const orders = mockOrders.filter((order) => order.nicknameCode === code);
     const member = readMemberProfile();
-    if (!orders.length && member.nicknameCode !== code) {
+    if (!orders.length && member.nicknameCode !== code && noOrderDemoMember.nicknameCode !== code) {
       result.innerHTML = `<p class="quick-lookup-empty" role="status">일치하는 회원주문 코드가 없습니다.</p>`;
       return;
     }
@@ -1743,6 +1763,7 @@ function orderListCard(order) {
 }
 
 function renderOrderHistory() {
+  const memberOrders = mockOrders.filter((order) => phoneDigits(order.phone) === loggedInPhone());
   const content = `
     <header class="mypage-content-heading"><h2>주문내역</h2><p>주문상품과 수령·결제 상태를 확인할 수 있습니다.</p></header>
     <div class="order-channel-tabs" role="tablist" aria-label="주문경로"><button type="button" class="is-active" data-order-channel-filter="">전체</button><button type="button" data-order-channel-filter="링크주문">링크주문</button><button type="button" data-order-channel-filter="채팅주문">채팅주문</button></div>
@@ -1751,8 +1772,8 @@ function renderOrderHistory() {
       <label><span class="sr-only">처리상태</span><select id="orderStatusFilter"><option value="">전체 상태</option><optgroup label="주문상태"><option>주문접수</option><option>픽업대기</option><option>픽업완료</option><option>배달대기</option><option>배달중</option><option>배달완료</option></optgroup><optgroup label="취소·반품상태"><option>취소요청</option><option>취소승인</option><option>취소반려</option><option>반품요청</option><option>반품승인</option><option>반품반려</option></optgroup></select></label>
       <button class="secondary-button" id="orderHistorySearch" type="button">조회</button>
     </div>
-    <div class="order-history-count">총 <strong id="orderHistoryCount">${mockOrders.length}</strong>건</div>
-    <div class="order-history-list" id="orderHistoryList">${mockOrders.map(orderListCard).join("")}</div>`;
+    <div class="order-history-count">총 <strong id="orderHistoryCount">${memberOrders.length}</strong>건</div>
+    <div class="order-history-list" id="orderHistoryList">${memberOrders.length ? memberOrders.map(orderListCard).join("") : '<p class="quick-lookup-empty">주문내역이 없습니다.</p>'}</div>`;
   pageContent.innerHTML = myPageFrame(content);
   bindNoticeButtons();
   bindOrderRequestActions();
@@ -1914,8 +1935,10 @@ function renderLogin() {
       return;
     }
     localStorage.setItem("onmaeul-login", JSON.stringify({ phone, keepLogin: data.get("keepLogin") === "on" }));
+    const afterLogin = sessionStorage.getItem("onmaeul-after-login");
+    sessionStorage.removeItem("onmaeul-after-login");
     showToast("로그인되었습니다.");
-    window.setTimeout(() => { window.location.href = "./index.html"; }, 500);
+    window.setTimeout(() => { window.location.href = afterLogin || "./index.html"; }, 500);
   });
 }
 
@@ -2329,6 +2352,12 @@ function renderPolicyPage(type) {
 function renderPage() {
   const params = new URLSearchParams(window.location.search);
   const view = params.get("view") || "home";
+  if (["order-history", "my-info", "delivery-address", "withdrawal"].includes(view) && !loggedInPhone()) {
+    sessionStorage.setItem("onmaeul-after-login", window.location.search);
+    window.alert("로그인이 필요합니다.");
+    window.location.replace("?view=login");
+    return;
+  }
   if (view === "product") renderProduct(params);
   else if (view === "cart") renderCart();
   else if (view === "order") renderOrder();
@@ -2371,6 +2400,7 @@ document.querySelectorAll(".login-action, .drawer-member-menu > a:first-child").
     event.preventDefault();
     localStorage.removeItem("onmaeul-login");
     sessionStorage.removeItem("onmaeul-quick-order-intent");
+    sessionStorage.removeItem("onmaeul-after-login");
     window.location.href = "./index.html";
   });
 });
