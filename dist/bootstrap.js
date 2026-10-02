@@ -58,6 +58,7 @@ app.innerHTML = `
     </nav>
     <strong class="drawer-category-title">카테고리</strong>
     <nav class="category-list" id="categoryList" aria-label="카테고리 목록"></nav>
+    <a class="drawer-admin-login" href="https://claude.ai/artifact/8XjyU153zPooyw813v1Bam" target="_blank" rel="noopener noreferrer">관리자 로그인</a>
     <a class="drawer-franchise-link" href="?view=franchise-signup">가맹점 가입신청</a>
   </aside>
 
