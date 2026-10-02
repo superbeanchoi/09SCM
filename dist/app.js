@@ -1630,9 +1630,8 @@ function openQuickOrder(orderNumber, action) {
     return;
   }
   if (String(login.phone).replace(/\D/g, "") !== String(order.phone).replace(/\D/g, "")) {
-    sessionStorage.setItem("onmaeul-quick-order-intent", JSON.stringify({ orderNumber, action }));
-    window.alert("주문 시 등록한 휴대폰번호로 로그인해 주세요.");
-    window.location.href = "?view=login";
+    sessionStorage.removeItem("onmaeul-quick-order-intent");
+    window.location.href = "./index.html";
     return;
   }
   if (action === "detail") {
@@ -1801,8 +1800,8 @@ function renderOrderDetail(params) {
     return;
   }
   if (String(login.phone).replace(/\D/g, "") !== String(order.phone).replace(/\D/g, "")) {
-    sessionStorage.setItem("onmaeul-quick-order-intent", JSON.stringify({ orderNumber, action: params.get("action") || "detail" }));
-    window.location.href = "?view=login";
+    sessionStorage.removeItem("onmaeul-quick-order-intent");
+    window.location.href = "./index.html";
     return;
   }
   const rows = getMockOrderRows(order);
@@ -1877,16 +1876,12 @@ function bindPasswordToggles() {
 }
 
 function renderLogin() {
-  let quickOrderIntent;
-  try { quickOrderIntent = JSON.parse(sessionStorage.getItem("onmaeul-quick-order-intent")); } catch {}
   pageContent.innerHTML = `
     <section class="site-width auth-page">
       <div class="auth-card auth-card-small">
         <header class="auth-heading"><span>MEMBER</span><h1>로그인</h1><p>가입한 휴대폰번호로 로그인해 주세요.</p></header>
-        ${quickOrderIntent?.orderNumber ? '<p class="auth-order-notice">주문 시 등록한 휴대폰번호로 로그인해 주세요.</p>' : ""}
         <form id="loginForm" class="auth-form">
           <label class="auth-field"><span>휴대폰번호</span><input name="phone" type="tel" placeholder="010-0000-0000" autocomplete="tel" required /></label>
-          ${quickOrderIntent?.orderNumber ? '<p class="auth-order-error" id="loginOrderError" role="alert" hidden></p>' : ""}
           <label class="auth-field"><span>비밀번호</span><span class="password-field"><input id="loginPassword" name="password" type="password" placeholder="비밀번호를 입력해 주세요." autocomplete="current-password" required /><button type="button" data-password-toggle="loginPassword" aria-label="비밀번호 보기">보기</button></span></label>
           <label class="auth-checkbox"><input name="keepLogin" type="checkbox" /><span>로그인 상태 유지</span></label>
           <button class="primary-button auth-submit" type="submit">로그인</button>
@@ -1904,22 +1899,17 @@ function renderLogin() {
     try { intent = JSON.parse(sessionStorage.getItem("onmaeul-quick-order-intent")); } catch {}
     if (intent?.orderNumber) {
       const order = mockOrders.find((item) => item.orderNumber === intent.orderNumber);
+      localStorage.setItem("onmaeul-login", JSON.stringify({ phone, keepLogin: data.get("keepLogin") === "on" }));
       if (order && phone === phoneDigits(order.phone)) {
-        localStorage.setItem("onmaeul-login", JSON.stringify({ phone, keepLogin: data.get("keepLogin") === "on" }));
         if (intent.action === "detail") {
           sessionStorage.removeItem("onmaeul-quick-order-intent");
           window.location.href = `?view=order-detail&order=${encodeURIComponent(order.orderNumber)}`;
         } else {
           window.location.href = "?view=quick-order-lookup";
         }
-      } else if (order) {
-        const message = document.querySelector("#loginOrderError");
-        message.textContent = "주문 시 등록한 휴대폰번호를 확인해 주세요.";
-        message.hidden = false;
-        event.currentTarget.elements.phone.focus();
       } else {
         sessionStorage.removeItem("onmaeul-quick-order-intent");
-        showToast("주문을 찾을 수 없습니다. 다시 조회해 주세요.");
+        window.location.href = "./index.html";
       }
       return;
     }
