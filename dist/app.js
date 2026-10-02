@@ -36,12 +36,6 @@ products.forEach((product) => {
   }
 });
 
-const bannerSlides = [
-  { eyebrow: "이번 주 공동구매", title: "온마을 제철 과일 모음", copy: "목요일 주문 마감 · 금요일 오후 매장 픽업" },
-  { eyebrow: "주말 식탁 준비", title: "신선한 채소를 한 번에", copy: "필요한 만큼 주문하고 가까운 매장에서 수령하세요" },
-  { eyebrow: "온마을 추천", title: "믿고 고른 우리 동네 먹거리", copy: "공동구매 가격으로 알뜰하게 만나보세요" },
-];
-
 const mockOrders = [
   {
     orderNumber: "OM260914-102913",
@@ -405,7 +399,6 @@ const cartCounts = document.querySelectorAll("[data-cart-count]");
 const mobileSearchToggle = document.querySelector("#mobileSearchToggle");
 const toast = document.querySelector("#toast");
 
-let bannerIndex = 0;
 let selectedCartKeys = null;
 let activeCartFulfillment = "pickup";
 
@@ -616,14 +609,6 @@ function renderMain() {
       </div>
     </section>
     <section class="site-width main-content">
-      <section class="banner-slider" aria-label="프로모션 배너">
-        <img src="./banner-seasonal-produce.png" alt="신선한 제철 농산물과 공동구매 상품" />
-        <div class="banner-copy" id="bannerCopy"></div>
-        <button class="banner-arrow is-left" id="bannerPrev" type="button" aria-label="이전 배너">‹</button>
-        <button class="banner-arrow is-right" id="bannerNext" type="button" aria-label="다음 배너">›</button>
-        <div class="banner-dots" id="bannerDots" aria-label="배너 선택"></div>
-      </section>
-
       ${todayPickup.length ? `<section class="featured-section" aria-labelledby="todayPickupTitle">
         <div class="section-heading"><div><h1 id="todayPickupTitle">오늘 픽업 가능 상품</h1><p>오늘 매장에서 픽업할 수 있는 상품을 만나보세요.</p></div><a href="?view=catalog&pickupDate=${localDateKey()}">픽업상품 보기 →</a></div>
         <div class="product-grid">${todayPickup.map(productCard).join("")}</div>
@@ -641,26 +626,7 @@ function renderMain() {
         <div class="product-grid">${featured.map(productCard).join("")}</div>
       </section>
     </section>`;
-  bindBanner();
   bindAccountCopy();
-}
-
-function renderBanner() {
-  const slide = bannerSlides[bannerIndex];
-  document.querySelector("#bannerCopy").innerHTML = `<span>${slide.eyebrow}</span><strong>${slide.title}</strong><p>${slide.copy}</p>`;
-  document.querySelector("#bannerDots").innerHTML = bannerSlides.map((_, index) => `<button type="button" data-banner="${index}" aria-label="${index + 1}번 배너" aria-current="${index === bannerIndex}"></button>`).join("");
-}
-
-function bindBanner() {
-  renderBanner();
-  document.querySelector("#bannerPrev").addEventListener("click", () => { bannerIndex = (bannerIndex - 1 + bannerSlides.length) % bannerSlides.length; renderBanner(); });
-  document.querySelector("#bannerNext").addEventListener("click", () => { bannerIndex = (bannerIndex + 1) % bannerSlides.length; renderBanner(); });
-  document.querySelector("#bannerDots").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-banner]");
-    if (!button) return;
-    bannerIndex = Number(button.dataset.banner);
-    renderBanner();
-  });
 }
 
 function renderCatalog(params) {
