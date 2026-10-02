@@ -413,6 +413,37 @@ function formatPrice(value) {
   return `${value.toLocaleString("ko-KR")}원`;
 }
 
+function phoneDigits(value) {
+  return String(value || "").replace(/\D/g, "").slice(0, 11);
+}
+
+function formatPhone(value) {
+  const digits = phoneDigits(value);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
+function bindPhoneInputs() {
+  document.querySelectorAll('input[type="tel"]').forEach((input) => {
+    input.inputMode = "numeric";
+    input.maxLength = 13;
+    input.pattern = "[0-9]{3}-[0-9]{4}-[0-9]{4}";
+    input.value = formatPhone(input.value);
+    input.addEventListener("input", () => {
+      const digitCount = phoneDigits(input.value.slice(0, input.selectionStart ?? input.value.length)).length;
+      input.value = formatPhone(input.value);
+      let position = 0;
+      let seen = 0;
+      while (position < input.value.length && seen < digitCount) {
+        if (/\d/.test(input.value[position])) seen += 1;
+        position += 1;
+      }
+      input.setSelectionRange(position, position);
+    });
+  });
+}
+
 function getProductPricing(product) {
   const regularPrice = Number(product.regularPrice) || product.price;
   const hasDiscount = regularPrice > product.price;
@@ -985,7 +1016,7 @@ function renderOrder() {
             <div class="checkout-section-title"><span>02</span><h2 id="customerTitle">주문자 정보</h2></div>
             <div class="checkout-form-grid member-grid">
               <label class="checkout-field"><span>주문자명</span><input id="customerName" name="customerName" type="text" value="${escapeText(member.customerName)}" required /></label>
-              <label class="checkout-field"><span>휴대폰번호</span><input id="customerPhone" name="customerPhone" type="tel" value="${escapeText(member.phone)}" required /></label>
+              <label class="checkout-field"><span>휴대폰번호</span><input id="customerPhone" name="customerPhone" type="tel" value="${escapeText(formatPhone(member.phone))}" required /></label>
               <label class="checkout-field"><span>회원주문 코드</span><input id="customerNicknameCode" type="text" value="${escapeText(member.nicknameCode)}" readonly /><small class="field-message">회원정보에서 불러온 숫자 4자리 코드입니다.</small></label>
             </div>
           </section>
@@ -1096,13 +1127,13 @@ function renderOrder() {
     const fulfillment = form.elements.fulfillment.value;
     const payment = fulfillment === "delivery" ? "card" : form.elements.payment.value;
     const customerName = document.querySelector("#customerName").value.trim();
-    const phone = document.querySelector("#customerPhone").value.trim();
+    const phone = phoneDigits(document.querySelector("#customerPhone").value);
     const nicknameCode = document.querySelector("#customerNicknameCode").value.trim();
     const deliveryAddressMode = form.querySelector("[name=\"deliveryAddressMode\"]:checked")?.value || "manual";
     const deliveryAddress = deliveryAddressMode === "saved" ? member.address : document.querySelector("#deliveryAddress").value.trim();
     const deliveryAddressName = deliveryAddressMode === "saved" ? member.addressName || "대표 배달지" : "직접 입력";
     const depositorName = document.querySelector("#depositorName").value.trim();
-    if (!customerName || !phone || !nicknameCode) return showToast("주문자 정보를 확인해 주세요.");
+    if (!customerName || phone.length !== 11 || !nicknameCode) return showToast("주문자 정보를 확인해 주세요.");
     if (fulfillment === "delivery" && !deliveryAddress) return showToast("배달 주소를 입력해 주세요.");
     if (payment === "transfer" && !depositorName) return showToast("입금자명을 입력해 주세요.");
     if (!document.querySelector("#orderAgreement").checked) return showToast("주문내용동의가 필요합니다.");
@@ -1160,7 +1191,7 @@ function renderOrderComplete() {
       <div class="completion-layout">
         <div class="completion-main">
           <section class="completion-card"><h2>주문상품</h2><div class="completion-list">${order.items.map((item) => `<div><span><small>${escapeText(item.category1)} &gt; ${escapeText(item.category2)}</small><b>${escapeText(item.name)}</b><small>수량 ${item.quantity}개</small>${!isDelivery ? `<small>${pickupPeriodText(item.pickupStart, item.pickupEnd)} 픽업</small>` : ""}</span><strong>${formatPrice(item.price * item.quantity)}</strong></div>`).join("")}</div></section>
-          <section class="completion-card"><h2>주문자 정보</h2><dl class="completion-info"><div><dt>주문자명</dt><dd>${escapeText(order.customerName)}</dd></div><div><dt>휴대폰번호</dt><dd>${escapeText(order.phone)}</dd></div><div><dt>회원주문 코드</dt><dd>${escapeText(order.nicknameCode || "-")}</dd></div></dl></section>
+          <section class="completion-card"><h2>주문자 정보</h2><dl class="completion-info"><div><dt>주문자명</dt><dd>${escapeText(order.customerName)}</dd></div><div><dt>휴대폰번호</dt><dd>${formatPhone(order.phone)}</dd></div><div><dt>회원주문 코드</dt><dd>${escapeText(order.nicknameCode || "-")}</dd></div></dl></section>
           <section class="completion-card"><h2>${isDelivery ? "배달 정보" : "픽업 정보"}</h2><dl class="completion-info">${isDelivery ? `<div><dt>배달지</dt><dd>${order.deliveryAddressName ? `<b>${escapeText(order.deliveryAddressName)}</b><br />` : ""}${escapeText(order.deliveryAddress)}</dd></div>${order.deliveryRequest ? `<div><dt>요청사항</dt><dd>${escapeText(order.deliveryRequest)}</dd></div>` : ""}` : `<div><dt>픽업 장소</dt><dd>온마을 공동구매<br />경기 수원시 영통구 온마을로 27, 1층</dd></div><div><dt>공통 픽업가능일</dt><dd>${pickupPeriodText(order.pickupWindow?.start, order.pickupWindow?.end)}</dd></div>${order.pickupRequest ? `<div><dt>요청사항</dt><dd>${escapeText(order.pickupRequest)}</dd></div>` : ""}`}</dl></section>
           <section class="completion-card"><h2>결제 정보</h2><dl class="completion-info"><div><dt>결제수단</dt><dd>${paymentName}</dd></div>${order.payment === "transfer" ? `<div><dt>입금계좌</dt><dd>국민 123456-01-123456 · 온마을마켓</dd></div><div><dt>입금자명</dt><dd>${escapeText(order.depositorName)}</dd></div>` : ""}</dl></section>
         </div>
@@ -1203,7 +1234,7 @@ function readMemberProfile() {
   try { storedMember = JSON.parse(localStorage.getItem("onmaeul-member")); } catch {}
   const demoMember = {
     customerName: "홍길동",
-    phone: "010-1234-5678",
+    phone: "01012345678",
     email: "hongildong@example.com",
     nicknameCode: "7942",
     chatNickname: "산책러",
@@ -1269,7 +1300,7 @@ function renderMyInfo() {
         </div>
         <div class="mypage-readonly-field">
           <span>휴대폰번호</span>
-          <strong>${escapeText(member.phone)}</strong>
+          <strong>${formatPhone(member.phone)}</strong>
           <p>휴대폰번호는 회원 식별정보로 사용되어 직접 변경할 수 없습니다. 변경이 필요한 경우 고객센터로 문의해 주세요.</p>
         </div>
       </section>
@@ -1544,10 +1575,10 @@ function openRequestDetailModal(orderNumber) {
 
 function bindOrderRequestActions() {
   document.querySelectorAll("[data-order-request]").forEach((button) => {
-    button.addEventListener("click", () => openQuickOrder(button.dataset.orderNumber, button.dataset.orderRequest));
+    button.addEventListener("click", () => openOrderRequestModal(button.dataset.orderNumber, button.dataset.orderRequest));
   });
   document.querySelectorAll("[data-request-detail]").forEach((button) => {
-    button.addEventListener("click", () => openQuickOrder(button.dataset.requestDetail, "request-detail"));
+    button.addEventListener("click", () => openRequestDetailModal(button.dataset.requestDetail));
   });
 }
 
@@ -1775,7 +1806,7 @@ function renderOrderDetail(params) {
     <div class="order-detail-grid">
       <section class="order-detail-section">
         <h3>주문자 정보</h3>
-        <dl class="order-detail-info"><div><dt>주문경로</dt><dd>${order.orderChannel || "링크주문"}</dd></div><div><dt>주문자명</dt><dd>${order.customerName}</dd></div><div><dt>휴대폰번호</dt><dd>${order.phone}</dd></div><div><dt>회원주문 코드</dt><dd>${order.nicknameCode}</dd></div>${order.orderChannel === "채팅주문" ? `<div><dt>채팅주문 닉네임</dt><dd>${escapeText(order.chatNickname || "산책러")}</dd></div>` : ""}</dl>
+        <dl class="order-detail-info"><div><dt>주문경로</dt><dd>${order.orderChannel || "링크주문"}</dd></div><div><dt>주문자명</dt><dd>${order.customerName}</dd></div><div><dt>휴대폰번호</dt><dd>${formatPhone(order.phone)}</dd></div><div><dt>회원주문 코드</dt><dd>${order.nicknameCode}</dd></div>${order.orderChannel === "채팅주문" ? `<div><dt>채팅주문 닉네임</dt><dd>${escapeText(order.chatNickname || "산책러")}</dd></div>` : ""}</dl>
       </section>
       <section class="order-detail-section">
         <h3>${isDelivery ? "배달 정보" : "픽업 정보"}</h3>
@@ -1837,12 +1868,14 @@ function renderLogin() {
   document.querySelector("#loginForm").addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+    const phone = phoneDigits(data.get("phone"));
+    if (phone.length !== 11) return showToast("휴대폰번호 11자리를 입력해 주세요.");
     let intent;
     try { intent = JSON.parse(sessionStorage.getItem("onmaeul-quick-order-intent")); } catch {}
     if (intent?.orderNumber) {
       const order = mockOrders.find((item) => item.orderNumber === intent.orderNumber);
-      if (order && String(data.get("phone")).replace(/\D/g, "") === String(order.phone).replace(/\D/g, "")) {
-        localStorage.setItem("onmaeul-login", JSON.stringify({ phone: data.get("phone"), keepLogin: data.get("keepLogin") === "on" }));
+      if (order && phone === phoneDigits(order.phone)) {
+        localStorage.setItem("onmaeul-login", JSON.stringify({ phone, keepLogin: data.get("keepLogin") === "on" }));
         sessionStorage.removeItem("onmaeul-quick-order-intent");
         window.location.href = `?view=order-detail&order=${encodeURIComponent(order.orderNumber)}${intent.action === "detail" ? "" : `&action=${encodeURIComponent(intent.action)}`}`;
       } else if (order) {
@@ -1856,7 +1889,7 @@ function renderLogin() {
       }
       return;
     }
-    localStorage.setItem("onmaeul-login", JSON.stringify({ phone: data.get("phone"), keepLogin: data.get("keepLogin") === "on" }));
+    localStorage.setItem("onmaeul-login", JSON.stringify({ phone, keepLogin: data.get("keepLogin") === "on" }));
     showToast("로그인되었습니다.");
     window.setTimeout(() => { window.location.href = "./index.html"; }, 500);
   });
@@ -1917,9 +1950,14 @@ function renderSignup() {
   const aliasMessage = document.querySelector("#aliasMessage");
   let phoneVerified = false;
   let aliasChecked = false;
+  document.querySelector("#signupPhone").addEventListener("input", () => {
+    phoneVerified = false;
+    phoneMessage.textContent = "휴대폰번호 인증이 필요합니다.";
+    phoneMessage.classList.remove("is-success");
+  });
   document.querySelector("#sendSignupCode").addEventListener("click", () => {
-    const phone = document.querySelector("#signupPhone").value.replace(/\D/g, "");
-    if (phone.length < 10) return showToast("휴대폰번호를 확인해 주세요.");
+    const phone = phoneDigits(document.querySelector("#signupPhone").value);
+    if (phone.length !== 11) return showToast("휴대폰번호 11자리를 입력해 주세요.");
     phoneVerified = false;
     phoneMessage.textContent = "인증번호가 발송되었습니다. 유효시간 03:00";
     phoneMessage.classList.remove("is-success");
@@ -1952,6 +1990,7 @@ function renderSignup() {
     if (form.elements.password.value !== form.elements.passwordConfirm.value) return showToast("비밀번호가 일치하지 않습니다.");
     if (!form.reportValidity()) return;
     const data = Object.fromEntries(new FormData(form).entries());
+    data.phone = phoneDigits(data.phone);
     localStorage.setItem("onmaeul-member", JSON.stringify(data));
     localStorage.setItem("onmaeul-login", JSON.stringify({ phone: data.phone, keepLogin: true }));
     showToast("회원가입이 완료되었습니다.");
@@ -2097,8 +2136,8 @@ function renderFranchiseSignup() {
     userIdMessage.classList.remove("is-success");
   });
   document.querySelector("#sendFranchiseCode").addEventListener("click", () => {
-    const phone = document.querySelector("#franchisePhone").value.replace(/\D/g, "");
-    if (phone.length < 10) return showToast("휴대폰번호를 확인해 주세요.");
+    const phone = phoneDigits(document.querySelector("#franchisePhone").value);
+    if (phone.length !== 11) return showToast("휴대폰번호 11자리를 입력해 주세요.");
     phoneVerified = false;
     phoneMessage.textContent = "인증번호가 발송되었습니다. 유효시간 03:00";
     phoneMessage.classList.remove("is-success");
@@ -2196,8 +2235,8 @@ function renderPasswordReset() {
   const resetMessage = document.querySelector("#resetMessage");
   const resetNext = document.querySelector("#resetNext");
   document.querySelector("#sendResetCode").addEventListener("click", () => {
-    const phone = document.querySelector("#resetPhone").value.replace(/\D/g, "");
-    if (phone.length < 10) return showToast("휴대폰번호를 확인해 주세요.");
+    const phone = phoneDigits(document.querySelector("#resetPhone").value);
+    if (phone.length !== 11) return showToast("휴대폰번호 11자리를 입력해 주세요.");
     resetNext.disabled = true;
     resetMessage.textContent = "인증번호가 발송되었습니다. 유효시간 03:00";
     resetMessage.classList.remove("is-success");
@@ -2284,6 +2323,7 @@ function renderPage() {
   else if (view === "withdrawal") renderWithdrawal();
   else if (view === "catalog") renderCatalog(params);
   else renderMain();
+  bindPhoneInputs();
   const quickLink = document.querySelector("#quickOrderLookup");
   if (quickLink) quickLink.hidden = view === "quick-order-lookup";
   updateCartCount();
