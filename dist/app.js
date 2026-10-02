@@ -1630,8 +1630,8 @@ function openQuickOrder(orderNumber, action) {
     return;
   }
   if (String(login.phone).replace(/\D/g, "") !== String(order.phone).replace(/\D/g, "")) {
-    sessionStorage.removeItem("onmaeul-quick-order-intent");
-    window.location.href = "./index.html";
+    sessionStorage.setItem("onmaeul-quick-order-intent", JSON.stringify({ orderNumber, action }));
+    window.location.href = "?view=login";
     return;
   }
   if (action === "detail") {
@@ -1800,8 +1800,8 @@ function renderOrderDetail(params) {
     return;
   }
   if (String(login.phone).replace(/\D/g, "") !== String(order.phone).replace(/\D/g, "")) {
-    sessionStorage.removeItem("onmaeul-quick-order-intent");
-    window.location.href = "./index.html";
+    sessionStorage.setItem("onmaeul-quick-order-intent", JSON.stringify({ orderNumber, action: params.get("action") || "detail" }));
+    window.location.href = "?view=login";
     return;
   }
   const rows = getMockOrderRows(order);
