@@ -381,6 +381,7 @@ img { display: block; max-width: 100%; }
 }
 
 .product-card { min-width: 0; }
+.product-soldout-badge { position: absolute; top: 10px; left: 10px; z-index: 3; border-radius: 4px; padding: 5px 8px; background: var(--text-secondary); color: var(--surface); font-size: 12px; font-weight: 700; line-height: 1; pointer-events: none; }
 
 .product-link {
   position: relative;
@@ -635,6 +636,7 @@ img { display: block; max-width: 100%; }
   .info-item:first-child { border-left: 1px solid var(--border); }
   .bank-info { grid-column: span 2; }
   .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .availability-section .product-card:nth-child(n + 4) { display: none; }
 }
 
 @media (max-width: 720px) {
@@ -691,6 +693,7 @@ img { display: block; max-width: 100%; }
   .section-heading > a { font-size: 12px; }
 
   .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; }
+  .availability-section .product-card:nth-child(n + 3) { display: none; }
   .product-hover { display: none; }
   .product-name { font-size: 14px; line-height: 1.45; }
   .product-price,
