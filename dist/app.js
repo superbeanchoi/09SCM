@@ -1527,6 +1527,9 @@ function openOrderRequestModal(orderNumber, requestKind) {
       }
     } catch {}
     closeOrderModal();
+    if (new URLSearchParams(window.location.search).get("view") === "quick-order-lookup") {
+      quickLookupTab = quickLookupIsComplete(order) ? "complete" : "active";
+    }
     renderPage();
     showToast(isDirectCardCancel ? "주문과 카드결제가 취소되었습니다." : isDirectCancel ? "주문이 취소되고 판매가능수량이 복구되었습니다." : isCancel ? "취소 요청이 접수되었습니다." : "반품 요청이 접수되었습니다.");
   });
@@ -1628,11 +1631,21 @@ function openQuickOrder(orderNumber, action) {
   }
   if (String(login.phone).replace(/\D/g, "") !== String(order.phone).replace(/\D/g, "")) {
     sessionStorage.setItem("onmaeul-quick-order-intent", JSON.stringify({ orderNumber, action }));
+    window.alert("주문 시 등록한 휴대폰번호로 로그인해 주세요.");
     window.location.href = "?view=login";
     return;
   }
-  window.location.href = `?view=order-detail&order=${encodeURIComponent(orderNumber)}${action === "detail" ? "" : `&action=${encodeURIComponent(action)}`}`;
+  if (action === "detail") {
+    window.location.href = `?view=order-detail&order=${encodeURIComponent(orderNumber)}`;
+  } else if (action === "request-detail") {
+    openRequestDetailModal(orderNumber);
+  } else if (action === "cancel" || action === "return") {
+    openOrderRequestModal(orderNumber, action);
+  }
 }
+
+let quickLookupCode = "";
+let quickLookupTab = "active";
 
 function renderQuickOrderLookup() {
   pageContent.innerHTML = `<section class="site-width quick-lookup-page">
@@ -1646,7 +1659,8 @@ function renderQuickOrderLookup() {
   </section>`;
   const input = document.querySelector("#quickLookupCode");
   const result = document.querySelector("#quickLookupResult");
-  const showOrders = (code) => {
+  const showOrders = (code, initialTab = quickLookupTab) => {
+    quickLookupCode = code;
     const orders = mockOrders.filter((order) => order.nicknameCode === code);
     const member = readMemberProfile();
     if (!orders.length && member.nicknameCode !== code) {
@@ -1659,6 +1673,7 @@ function renderQuickOrderLookup() {
       <div class="quick-lookup-list" id="quickLookupList"></div>`;
     const list = document.querySelector("#quickLookupList");
     const selectTab = (tab) => {
+      quickLookupTab = tab;
       result.querySelectorAll("[data-quick-tab]").forEach((button) => {
         const selected = button.dataset.quickTab === tab;
         button.classList.toggle("is-active", selected);
@@ -1669,7 +1684,7 @@ function renderQuickOrderLookup() {
       list.querySelectorAll("[data-quick-action]").forEach((button) => button.addEventListener("click", () => openQuickOrder(button.dataset.orderNumber, button.dataset.quickAction)));
     };
     result.querySelectorAll("[data-quick-tab]").forEach((button) => button.addEventListener("click", () => selectTab(button.dataset.quickTab)));
-    selectTab("active");
+    selectTab(initialTab);
   };
   document.querySelector("#quickLookupForm").addEventListener("submit", (event) => {
     event.preventDefault();
@@ -1679,6 +1694,21 @@ function renderQuickOrderLookup() {
     showOrders(code);
   });
   input.addEventListener("input", () => { input.value = input.value.replace(/\D/g, "").slice(0, 4); });
+  let intent;
+  try { intent = JSON.parse(sessionStorage.getItem("onmaeul-quick-order-intent")); } catch {}
+  const pendingOrder = intent?.orderNumber && mockOrders.find((order) => order.orderNumber === intent.orderNumber);
+  let login;
+  try { login = JSON.parse(localStorage.getItem("onmaeul-login")); } catch {}
+  if (pendingOrder && intent.action !== "detail" && phoneDigits(login?.phone) === phoneDigits(pendingOrder.phone)) {
+    sessionStorage.removeItem("onmaeul-quick-order-intent");
+    input.value = pendingOrder.nicknameCode;
+    showOrders(pendingOrder.nicknameCode, quickLookupIsComplete(pendingOrder) ? "complete" : "active");
+    if (intent.action === "request-detail") openRequestDetailModal(pendingOrder.orderNumber);
+    else if (intent.action === "cancel" || intent.action === "return") openOrderRequestModal(pendingOrder.orderNumber, intent.action);
+  } else if (quickLookupCode) {
+    input.value = quickLookupCode;
+    showOrders(quickLookupCode);
+  }
 }
 
 function orderListCard(order) {
@@ -1876,8 +1906,12 @@ function renderLogin() {
       const order = mockOrders.find((item) => item.orderNumber === intent.orderNumber);
       if (order && phone === phoneDigits(order.phone)) {
         localStorage.setItem("onmaeul-login", JSON.stringify({ phone, keepLogin: data.get("keepLogin") === "on" }));
-        sessionStorage.removeItem("onmaeul-quick-order-intent");
-        window.location.href = `?view=order-detail&order=${encodeURIComponent(order.orderNumber)}${intent.action === "detail" ? "" : `&action=${encodeURIComponent(intent.action)}`}`;
+        if (intent.action === "detail") {
+          sessionStorage.removeItem("onmaeul-quick-order-intent");
+          window.location.href = `?view=order-detail&order=${encodeURIComponent(order.orderNumber)}`;
+        } else {
+          window.location.href = "?view=quick-order-lookup";
+        }
       } else if (order) {
         const message = document.querySelector("#loginOrderError");
         message.textContent = "주문 시 등록한 휴대폰번호를 확인해 주세요.";
@@ -2324,11 +2358,32 @@ function renderPage() {
   else if (view === "catalog") renderCatalog(params);
   else renderMain();
   bindPhoneInputs();
+  updateLoginLinks();
   const quickLink = document.querySelector("#quickOrderLookup");
   if (quickLink) quickLink.hidden = view === "quick-order-lookup";
   updateCartCount();
   window.scrollTo(0, 0);
 }
+
+function updateLoginLinks() {
+  let login;
+  try { login = JSON.parse(localStorage.getItem("onmaeul-login")); } catch {}
+  const isLoggedIn = phoneDigits(login?.phone).length === 11;
+  document.querySelectorAll(".login-action, .drawer-member-menu > a:first-child").forEach((link) => {
+    link.textContent = isLoggedIn ? "로그아웃" : "로그인";
+    link.href = isLoggedIn ? "#logout" : "?view=login";
+  });
+}
+
+document.querySelectorAll(".login-action, .drawer-member-menu > a:first-child").forEach((link) => {
+  link.addEventListener("click", (event) => {
+    if (link.getAttribute("href") !== "#logout") return;
+    event.preventDefault();
+    localStorage.removeItem("onmaeul-login");
+    sessionStorage.removeItem("onmaeul-quick-order-intent");
+    window.location.href = "./index.html";
+  });
+});
 
 function renderCategories() {
   categoryList.innerHTML = `
