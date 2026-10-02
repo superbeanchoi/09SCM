@@ -106,8 +106,6 @@ img { display: block; max-width: 100%; }
 .header-action,
 .icon-button,
 .copy-button,
-.banner-arrow,
-.banner-dots button,
 .remove-button {
   border: 0;
   background: transparent;
@@ -230,8 +228,6 @@ img { display: block; max-width: 100%; }
 .primary-button:focus-visible,
 .secondary-button:focus-visible,
 .product-link:focus-visible,
-.banner-arrow:focus-visible,
-.banner-dots button:focus-visible,
 .remove-button:focus-visible {
   outline: 2px solid var(--key-color);
   outline-offset: 2px;
@@ -359,69 +355,8 @@ img { display: block; max-width: 100%; }
 .detail-page,
 .cart-page { padding: 24px 24px 64px; }
 
-.banner-slider {
-  position: relative;
-  min-height: 190px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--soft-surface);
-}
-
-.banner-slider > img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-}
-
-.banner-copy {
-  position: absolute;
-  top: 50%;
-  left: clamp(48px, 7vw, 110px);
-  width: min(430px, 42%);
-  transform: translateY(-50%);
-}
-
-.banner-copy span { display: block; margin-bottom: 8px; color: var(--key-color); font-size: 12px; font-weight: 700; }
-.banner-copy strong { display: block; margin-bottom: 8px; font-size: 24px; line-height: 1.35; }
-.banner-copy p { margin: 0; color: var(--text-secondary); font-size: 14px; }
-
-.banner-arrow {
-  position: absolute;
-  top: 50%;
-  width: 40px;
-  height: 40px;
-  transform: translateY(-50%);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: rgb(255 255 255 / 90%);
-  color: var(--text-secondary);
-  font-size: 24px;
-}
-
-.banner-arrow:hover { color: var(--key-color); }
-.banner-arrow.is-left { left: 14px; }
-.banner-arrow.is-right { right: 14px; }
-
-.banner-dots {
-  position: absolute;
-  right: 24px;
-  bottom: 18px;
-  display: flex;
-  gap: 7px;
-}
-
-.banner-dots button {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #b8b8b8;
-  padding: 0;
-}
-
-.banner-dots button[aria-current="true"] { background: var(--key-color); }
-
 .featured-section { padding-top: 36px; }
+.main-content > .featured-section:first-child { padding-top: 0; }
 
 .section-heading,
 .page-heading {
@@ -700,7 +635,6 @@ img { display: block; max-width: 100%; }
   .info-item:first-child { border-left: 1px solid var(--border); }
   .bank-info { grid-column: span 2; }
   .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .banner-copy { width: 48%; }
 }
 
 @media (max-width: 720px) {
@@ -747,22 +681,6 @@ img { display: block; max-width: 100%; }
   .catalog-page,
   .detail-page,
   .cart-page { padding: 18px 14px 44px; }
-
-  .banner-slider { min-height: 150px; }
-  .banner-slider > img { height: 174px; object-position: 64% center; }
-  .banner-copy {
-    left: 14px;
-    width: min(72%, 280px);
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: rgb(255 255 255 / 94%);
-  }
-  .banner-copy span { margin-bottom: 4px; }
-  .banner-copy strong { margin-bottom: 4px; font-size: 16px; }
-  .banner-copy p { font-size: 12px; }
-  .banner-arrow { display: none; }
-  .banner-dots { right: 12px; bottom: 10px; }
 
   .featured-section { padding-top: 28px; }
   .section-heading,
@@ -1807,7 +1725,7 @@ body.is-unavailable .quick-order-lookup { display: none; }
 .unavailable-lookup { border: 1px solid var(--border); border-radius: 6px; padding: 32px 36px 36px; background: var(--surface); }
 .unavailable-lookup .quick-lookup-heading { margin: 0 0 20px; }
 .unavailable-lookup .quick-lookup-heading h2 { margin: 0 0 6px; font-size: 24px; }
-.unavailable-lookup .quick-lookup-search { background: var(--soft-surface); }
+.unavailable-lookup .quick-lookup-search { background: var(--surface); }
 .unavailable-lookup .quick-lookup-member { margin-top: 24px; }
 
 @media (max-width: 720px) {
@@ -1833,5 +1751,4 @@ body.is-unavailable .quick-order-lookup { display: none; }
   .unavailable-notice h1 { font-size: 20px; }
   .unavailable-lookup { padding: 24px 16px; }
   .unavailable-lookup .quick-lookup-heading h2 { font-size: 20px; }
-  .unavailable-lookup .quick-lookup-search { padding: 16px 12px; }
 }
