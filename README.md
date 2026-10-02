@@ -4,10 +4,11 @@
 
 ## 접속 주소
 
-- [배포된 소매몰 목업](https://scm09-retail-mall-mockup.csb62929.chatgpt.site/)
-- [로그인 화면](https://scm09-retail-mall-mockup.csb62929.chatgpt.site/?view=login)
-- [간편 주문 조회](https://scm09-retail-mall-mockup.csb62929.chatgpt.site/?view=quick-order-lookup)
-- [가맹점 가입신청 화면](https://scm09-retail-mall-mockup.csb62929.chatgpt.site/?view=franchise-signup)
+- [GitHub Pages 소매몰 목업](https://superbeanchoi.github.io/09SCM/)
+- [로그인 화면](https://superbeanchoi.github.io/09SCM/?view=login)
+- [간편 주문 조회](https://superbeanchoi.github.io/09SCM/?view=quick-order-lookup)
+- [가맹점 가입신청 화면](https://superbeanchoi.github.io/09SCM/?view=franchise-signup)
+- [기존 ChatGPT Sites 주소](https://scm09-retail-mall-mockup.csb62929.chatgpt.site/) — 별도 배포 주소이며 GitHub 변경사항과 자동 동기화되지 않습니다.
 
 ## 시연용 회원 정보
 
@@ -31,4 +32,7 @@
 ## 파일 구성
 
 - `dist/`: 배포되는 소매몰 정적 파일
-- `.openai/hosting.json`: 목업 배포 설정
+- `.github/workflows/deploy-pages.yml`: `main`의 `dist/` 변경 시 GitHub Pages 자동 배포
+- `.openai/hosting.json`: 기존 ChatGPT Sites 배포 설정
+
+GitHub Pages는 이 저장소의 `dist/` 파일을 게시합니다. 로컬 또는 기존 Sites에서 수정한 내용은 GitHub 저장소의 `main` 브랜치에 반영해야 새 주소에 배포됩니다.
