@@ -1737,6 +1737,7 @@ function renderUnavailable() {
       <div class="unavailable-notice">
         <span class="unavailable-eyebrow">서비스 안내</span>
         <h1>현재 쇼핑몰을 이용할 수 없습니다.</h1>
+        <p>주문 내역은 아래에서 확인할 수 있습니다.</p>
       </div>
       <section class="unavailable-lookup" aria-labelledby="unavailableLookupTitle">
         <header class="quick-lookup-heading"><h2 id="unavailableLookupTitle">간편 주문 조회</h2><p>회원주문 코드로 주문 현황을 확인해 보세요.</p></header>
