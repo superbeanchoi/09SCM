@@ -1732,9 +1732,13 @@ function renderQuickOrderLookup() {
 
 function renderUnavailable() {
   pageContent.innerHTML = `<section class="unavailable-page">
+    <div class="unavailable-topbar"><div class="unavailable-topbar-inner"><span class="unavailable-brand-mark">09SCM</span><strong class="unavailable-brand">온마을 공동구매</strong></div></div>
     <div class="unavailable-content">
-      <strong class="unavailable-brand">온마을 공동구매</strong>
-      <h1>현재 쇼핑몰을 이용할 수 없습니다.</h1>
+      <div class="unavailable-notice">
+        <span class="unavailable-eyebrow">서비스 안내</span>
+        <h1>현재 쇼핑몰을 이용할 수 없습니다.</h1>
+        <p>주문 내역은 아래에서 확인할 수 있습니다.</p>
+      </div>
       <section class="unavailable-lookup" aria-labelledby="unavailableLookupTitle">
         <h2 id="unavailableLookupTitle">주문 조회</h2>
         <form class="quick-lookup-search" id="unavailableLookupForm">
