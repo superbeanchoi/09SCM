@@ -9,7 +9,7 @@ const products = [
   { id: 2, category1: "신선식품", category2: "채소", name: "대저 짭짤이 토마토 2kg", price: 15800, featured: true, stock: 18, saleMethod: "픽업", pickup: "9월 13일 오후 2시 이후", deadline: "9월 12일 오후 6시", imagePosition: "72% center" },
   { id: 3, category1: "축산·수산", category2: "정육", name: "국내산 한돈 삼겹살 600g", price: 14900, featured: true, stock: 12, saleMethod: "배달", pickup: "9월 14일 오후 3시 이후", deadline: "9월 12일 오후 5시" },
   { id: 4, category1: "간편식·간식", category2: "간편식", name: "수제 한우 떡갈비 4팩", price: 18500, regularPrice: 22000, featured: true, stock: 15, saleMethod: "픽업·배달", pickup: "9월 14일 오후 3시 이후", deadline: "9월 12일 오후 5시" },
-  { id: 5, category1: "신선식품", category2: "과일", name: "제주 한라봉 3kg", price: 21900, regularPrice: 25900, featured: true, stock: 10, saleMethod: "배달", pickup: "9월 15일 오전 11시 이후", deadline: "9월 13일 오후 6시", imagePosition: "88% center" },
+  { id: 5, category1: "신선식품", category2: "과일", name: "제주 한라봉 3kg", price: 21900, regularPrice: 25900, featured: true, stock: 0, soldOut: true, saleMethod: "배달", pickup: "9월 15일 오전 11시 이후", deadline: "9월 13일 오후 6시", imagePosition: "88% center" },
   { id: 6, category1: "신선식품", category2: "채소", name: "포슬포슬 햇감자 3kg", price: 9900, featured: true, stock: 24, saleMethod: "픽업", pickup: "9월 13일 오후 2시 이후", deadline: "9월 12일 오후 6시", imagePosition: "82% center" },
   { id: 7, category1: "축산·수산", category2: "수산", name: "손질 고등어 5팩", price: 16900, regularPrice: 19900, featured: true, stock: 10, saleMethod: "픽업·배달", pickup: "9월 14일 오후 4시 이후", deadline: "9월 12일 오후 3시" },
   { id: 8, category1: "간편식·간식", category2: "간식", name: "우리쌀 인절미 20개입", price: 11500, featured: true, stock: 14, saleMethod: "픽업", pickup: "9월 13일 오후 1시 이후", deadline: "9월 12일 오후 4시" },
@@ -29,6 +29,7 @@ function localDateKey(offset = 0) {
 }
 const samplePickupWindows = { 1: [-1, 1], 2: [0, 0], 4: [0, 2], 6: [0, 1], 7: [1, 3], 8: [0, 0], 10: [0, 3], 11: [2, 4], 12: [-2, 7] };
 products.forEach((product) => {
+  product.retailExposure = "노출중";
   const window = samplePickupWindows[product.id];
   if (window && product.saleMethod !== "배달") {
     product.pickupStart = localDateKey(window[0]);
@@ -487,6 +488,10 @@ function productIsPickupAvailableOn(product, dateKey) {
   return productFulfillmentOptions(product).includes("pickup") && product.pickupStart <= dateKey && dateKey <= product.pickupEnd;
 }
 
+function isRetailExposed(product) {
+  return product.retailExposure === "노출중";
+}
+
 function normalizeFulfillment(product, fulfillment) {
   const options = productFulfillmentOptions(product);
   return options.includes(fulfillment) ? fulfillment : options[0];
@@ -575,10 +580,12 @@ function productImage(product, size = "card") {
 
 function productCard(product) {
   const pickupText = productFulfillmentOptions(product).includes("pickup") ? `<span class="pickup-date-text">${pickupPeriodText(product.pickupStart, product.pickupEnd)}</span>` : "";
+  const soldOut = Boolean(product.soldOut || product.stock < 1);
   return `
-    <article class="product-card">
+    <article class="product-card${soldOut ? " is-soldout" : ""}">
       <a class="product-link" href="?view=product&id=${product.id}" aria-label="${product.name} 상세보기">
         ${productImage(product)}
+        ${soldOut ? `<span class="product-soldout-badge">품절</span>` : ""}
         <span class="product-hover">상품 상세보기 →</span>
         <span class="product-copy">
           <span class="product-availability">${fulfillmentBadges(product)}${pickupText}</span>
@@ -591,9 +598,9 @@ function productCard(product) {
 }
 
 function renderMain() {
-  const featured = products.filter((product) => product.featured).slice(0, 8);
-  const todayPickup = products.filter((product) => product.stock > 0 && productIsPickupAvailableOn(product, localDateKey())).slice(0, 4);
-  const deliveryAvailable = products.filter((product) => product.stock > 0 && productFulfillmentOptions(product).includes("delivery")).slice(0, 4);
+  const featured = products.filter((product) => isRetailExposed(product) && product.featured).slice(0, 8);
+  const todayPickup = products.filter((product) => isRetailExposed(product) && productIsPickupAvailableOn(product, localDateKey())).slice(0, 4);
+  const deliveryAvailable = products.filter((product) => isRetailExposed(product) && productFulfillmentOptions(product).includes("delivery")).slice(0, 4);
   pageContent.innerHTML = `
     <section class="store-information" aria-labelledby="storeInfoTitle">
       <h1 id="storeInfoTitle" class="sr-only">매장 정보</h1>
@@ -609,11 +616,11 @@ function renderMain() {
       </div>
     </section>
     <section class="site-width main-content">
-      ${todayPickup.length ? `<section class="featured-section" aria-labelledby="todayPickupTitle">
+      ${todayPickup.length ? `<section class="featured-section availability-section" aria-labelledby="todayPickupTitle">
         <div class="section-heading"><div><h1 id="todayPickupTitle">오늘 픽업 가능 상품</h1><p>오늘 매장에서 픽업할 수 있는 상품을 만나보세요.</p></div><a href="?view=catalog&pickupDate=${localDateKey()}">픽업상품 보기 →</a></div>
         <div class="product-grid">${todayPickup.map(productCard).join("")}</div>
       </section>` : ""}
-      ${deliveryAvailable.length ? `<section class="featured-section" aria-labelledby="deliveryAvailableTitle">
+      ${deliveryAvailable.length ? `<section class="featured-section availability-section" aria-labelledby="deliveryAvailableTitle">
         <div class="section-heading"><div><h1 id="deliveryAvailableTitle">배달 가능 상품</h1><p>우리 동네에서 배달받을 수 있는 상품을 확인해 보세요.</p></div><a href="?view=catalog&fulfillment=delivery">배달상품 보기 →</a></div>
         <div class="product-grid">${deliveryAvailable.map(productCard).join("")}</div>
       </section>` : ""}
@@ -638,8 +645,8 @@ function renderCatalog(params) {
   const visible = products.filter((product) => {
     const categoryMatch = (!category1 || product.category1 === category1) && (!category2 || product.category2 === category2);
     const queryMatch = !query || product.name.includes(query) || product.category1.includes(query) || product.category2.includes(query);
-    const fulfillmentMatch = pickupDate ? product.stock > 0 && productIsPickupAvailableOn(product, pickupDate) : !fulfillment || product.stock > 0 && productFulfillmentOptions(product).includes(fulfillment);
-    return categoryMatch && queryMatch && fulfillmentMatch;
+    const fulfillmentMatch = pickupDate ? productIsPickupAvailableOn(product, pickupDate) : !fulfillment || productFulfillmentOptions(product).includes(fulfillment);
+    return isRetailExposed(product) && categoryMatch && queryMatch && fulfillmentMatch;
   });
   const title = query ? `‘${query}’ 검색결과` : pickupDate ? `${pickupPeriodText(pickupDate, pickupDate)} 픽업 가능 상품` : fulfillment === "delivery" ? "배달 가능 상품" : category2 || category1 || "전체상품";
   pageContent.innerHTML = `
