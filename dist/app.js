@@ -1610,7 +1610,7 @@ function quickLookupIsComplete(order) {
   return order.cancelRefundStatus?.endsWith("승인") || ["픽업완료", "배달완료"].includes(order.processStatus);
 }
 
-function quickLookupOrderCard(order) {
+function quickLookupOrderCard(order, showActions = true) {
   const rows = getMockOrderRows(order);
   const action = order.cancelRefundStatus
     ? `<button class="secondary-button" type="button" data-quick-action="request-detail" data-order-number="${escapeText(order.orderNumber)}">취소·반품 상세</button>`
@@ -1633,7 +1633,7 @@ function quickLookupOrderCard(order) {
         ${order.cancelRefundStatus ? `<div><dt>취소·반품</dt><dd><span class="status-badge ${statusClass(order.cancelRefundStatus)}">${escapeText(order.cancelRefundStatus)}</span></dd></div>` : ""}
         <div><dt>결제금액</dt><dd><strong>${formatPrice(orderTotals(order).finalTotal)}</strong></dd></div>
       </dl>
-      <div class="quick-order-actions"><button class="primary-button" type="button" data-quick-action="detail" data-order-number="${escapeText(order.orderNumber)}">주문 상세</button>${action}</div>
+      ${showActions ? `<div class="quick-order-actions"><button class="primary-button" type="button" data-quick-action="detail" data-order-number="${escapeText(order.orderNumber)}">주문 상세</button>${action}</div>` : ""}
     </div>
   </article>`;
 }
@@ -1728,6 +1728,54 @@ function renderQuickOrderLookup() {
     input.value = quickLookupCode;
     showOrders(quickLookupCode);
   }
+}
+
+function renderUnavailable() {
+  pageContent.innerHTML = `<section class="unavailable-page">
+    <div class="unavailable-content">
+      <strong class="unavailable-brand">온마을 공동구매</strong>
+      <h1>현재 쇼핑몰을 이용할 수 없습니다.</h1>
+      <section class="unavailable-lookup" aria-labelledby="unavailableLookupTitle">
+        <h2 id="unavailableLookupTitle">주문 조회</h2>
+        <form class="quick-lookup-search" id="unavailableLookupForm">
+          <label for="unavailableLookupCode">회원주문 코드</label>
+          <div><input id="unavailableLookupCode" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="숫자 4자리" autocomplete="off" required /><button class="primary-button" type="submit">조회</button></div>
+        </form>
+        <div id="unavailableLookupResult" aria-live="polite"></div>
+      </section>
+    </div>
+  </section>`;
+  const input = document.querySelector("#unavailableLookupCode");
+  const result = document.querySelector("#unavailableLookupResult");
+  input.addEventListener("input", () => { input.value = input.value.replace(/\D/g, "").slice(0, 4); });
+  document.querySelector("#unavailableLookupForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const code = input.value.replace(/\D/g, "").slice(0, 4);
+    input.value = code;
+    if (code.length !== 4) return showToast("회원주문 코드 숫자 4자리를 입력해 주세요.");
+    const orders = mockOrders.filter((order) => order.nicknameCode === code);
+    const member = readMemberProfile();
+    if (!orders.length && member.nicknameCode !== code && noOrderDemoMember.nicknameCode !== code) {
+      result.innerHTML = `<p class="quick-lookup-empty" role="status">일치하는 회원주문 코드가 없습니다.</p>`;
+      return;
+    }
+    const nickname = code === member.nicknameCode ? member.chatNickname : orders.find((order) => order.chatNickname)?.chatNickname;
+    result.innerHTML = `<div class="quick-lookup-member"><span>회원주문 코드 <strong>${escapeText(code)}</strong></span><span>채팅주문 닉네임 <strong>${escapeText(nickname || "미등록")}</strong></span></div>
+      <div class="quick-lookup-tabs" role="tablist" aria-label="주문 진행 상태"><button type="button" data-unavailable-tab="active">진행 중 주문 <b>${orders.filter((order) => !quickLookupIsComplete(order)).length}</b></button><button type="button" data-unavailable-tab="complete">완료된 주문 <b>${orders.filter(quickLookupIsComplete).length}</b></button></div>
+      <div class="quick-lookup-list" id="unavailableLookupList"></div>`;
+    const list = result.querySelector("#unavailableLookupList");
+    const selectTab = (tab) => {
+      result.querySelectorAll("[data-unavailable-tab]").forEach((button) => {
+        const selected = button.dataset.unavailableTab === tab;
+        button.classList.toggle("is-active", selected);
+        button.setAttribute("aria-selected", String(selected));
+      });
+      const visible = orders.filter((order) => quickLookupIsComplete(order) === (tab === "complete"));
+      list.innerHTML = visible.length ? visible.map((order) => quickLookupOrderCard(order, false)).join("") : `<p class="quick-lookup-empty">${tab === "complete" ? "완료된" : "진행 중인"} 주문이 없습니다.</p>`;
+    };
+    result.querySelectorAll("[data-unavailable-tab]").forEach((button) => button.addEventListener("click", () => selectTab(button.dataset.unavailableTab)));
+    selectTab("active");
+  });
 }
 
 function orderListCard(order) {
@@ -2352,13 +2400,15 @@ function renderPolicyPage(type) {
 function renderPage() {
   const params = new URLSearchParams(window.location.search);
   const view = params.get("view") || "home";
+  document.body.classList.toggle("is-unavailable", view === "unavailable");
   if (["order-history", "my-info", "delivery-address", "withdrawal"].includes(view) && !loggedInPhone()) {
     sessionStorage.setItem("onmaeul-after-login", window.location.search);
     window.alert("로그인이 필요합니다.");
     window.location.replace("?view=login");
     return;
   }
-  if (view === "product") renderProduct(params);
+  if (view === "unavailable") renderUnavailable();
+  else if (view === "product") renderProduct(params);
   else if (view === "cart") renderCart();
   else if (view === "order") renderOrder();
   else if (view === "order-complete") renderOrderComplete();
@@ -2379,7 +2429,7 @@ function renderPage() {
   bindPhoneInputs();
   updateLoginLinks();
   const quickLink = document.querySelector("#quickOrderLookup");
-  if (quickLink) quickLink.hidden = view === "quick-order-lookup";
+  if (quickLink) quickLink.hidden = view === "quick-order-lookup" || view === "unavailable";
   updateCartCount();
   window.scrollTo(0, 0);
 }
