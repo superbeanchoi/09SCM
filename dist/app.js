@@ -516,11 +516,14 @@ function readCart() {
   } catch {}
   if (!cart) {
     cart = [{ id: 1, quantity: 1, fulfillment: "pickup" }, { id: 6, quantity: 1, fulfillment: "pickup" }, { id: 3, quantity: 1, fulfillment: "delivery" }, { id: 5, quantity: 1, fulfillment: "delivery" }];
-    localStorage.setItem("onmaeul-cart-soldout-seeded", "1");
+    localStorage.setItem("onmaeul-cart-soldout-seeded-v2", "1");
   }
-  else if (cart.length && !localStorage.getItem("onmaeul-cart-soldout-seeded")) {
-    if (!cart.some((item) => item.id === 5)) cart.push({ id: 5, quantity: 1, fulfillment: "delivery" });
-    localStorage.setItem("onmaeul-cart-soldout-seeded", "1");
+  else if (cart.length && !localStorage.getItem("onmaeul-cart-soldout-seeded-v2")) {
+    if (!cart.some((item) => item.id === 5)) {
+      cart.push({ id: 5, quantity: 1, fulfillment: "delivery" });
+      localStorage.setItem("onmaeul-cart", JSON.stringify(cart));
+    }
+    localStorage.setItem("onmaeul-cart-soldout-seeded-v2", "1");
   }
   const normalized = cart.map((item) => {
     const product = products.find((candidate) => candidate.id === item.id);
