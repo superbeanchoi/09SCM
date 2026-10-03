@@ -492,6 +492,10 @@ function isRetailExposed(product) {
   return product.retailExposure === "노출중";
 }
 
+function isSoldOut(product) {
+  return Boolean(product.soldOut || product.stock < 1);
+}
+
 function normalizeFulfillment(product, fulfillment) {
   const options = productFulfillmentOptions(product);
   return options.includes(fulfillment) ? fulfillment : options[0];
@@ -510,7 +514,14 @@ function readCart() {
     const stored = JSON.parse(localStorage.getItem("onmaeul-cart"));
     if (Array.isArray(stored)) cart = stored;
   } catch {}
-  if (!cart) cart = [{ id: 1, quantity: 1, fulfillment: "pickup" }, { id: 6, quantity: 1, fulfillment: "pickup" }, { id: 3, quantity: 1, fulfillment: "delivery" }];
+  if (!cart) {
+    cart = [{ id: 1, quantity: 1, fulfillment: "pickup" }, { id: 6, quantity: 1, fulfillment: "pickup" }, { id: 3, quantity: 1, fulfillment: "delivery" }, { id: 5, quantity: 1, fulfillment: "delivery" }];
+    localStorage.setItem("onmaeul-cart-soldout-seeded", "1");
+  }
+  else if (cart.length && !localStorage.getItem("onmaeul-cart-soldout-seeded")) {
+    if (!cart.some((item) => item.id === 5)) cart.push({ id: 5, quantity: 1, fulfillment: "delivery" });
+    localStorage.setItem("onmaeul-cart-soldout-seeded", "1");
+  }
   const normalized = cart.map((item) => {
     const product = products.find((candidate) => candidate.id === item.id);
     if (!product) return item;
@@ -548,11 +559,29 @@ function escapeText(value) {
 
 function saveOrderDraft(items, source) {
   const rows = items.map((item) => ({ ...item, product: products.find((product) => product.id === item.id) })).filter((item) => item.product);
+  if (rows.some((item) => isSoldOut(item.product))) return showToast("품절 상품은 주문할 수 없습니다. 장바구니를 확인해 주세요.");
   if (rows.some((item) => item.fulfillment === "pickup") && !pickupWindowIntersection(rows)) {
     return showToast("선택한 상품의 픽업 가능일이 겹치지 않습니다. 상품을 나눠 주문해 주세요.");
   }
   sessionStorage.setItem("onmaeul-order-draft", JSON.stringify({ items, source }));
+  if (!ensureOrderMember()) return;
   window.location.href = "?view=order";
+}
+
+function ensureOrderMember() {
+  if (!loggedInPhone()) {
+    sessionStorage.setItem("onmaeul-after-login", "?view=order");
+    window.alert("주문하려면 로그인이 필요합니다.");
+    window.location.href = "?view=login";
+    return false;
+  }
+  const member = readMemberProfile();
+  if (!member.customerName?.trim() || !member.email?.trim() || !/^\d{4}$/.test(member.nicknameCode || "")) {
+    window.alert("회원정보를 등록한 뒤 주문할 수 있습니다.");
+    window.location.href = "?view=my-info";
+    return false;
+  }
+  return true;
 }
 
 function readOrderDraft() {
@@ -580,7 +609,7 @@ function productImage(product, size = "card") {
 
 function productCard(product) {
   const pickupText = productFulfillmentOptions(product).includes("pickup") ? `<span class="pickup-date-text">${pickupPeriodText(product.pickupStart, product.pickupEnd)}</span>` : "";
-  const soldOut = Boolean(product.soldOut || product.stock < 1);
+  const soldOut = isSoldOut(product);
   return `
     <article class="product-card${soldOut ? " is-soldout" : ""}">
       <a class="product-link" href="?view=product&id=${product.id}" aria-label="${product.name} 상세보기">
@@ -668,7 +697,7 @@ function renderProduct(params) {
   const pricing = getProductPricing(product);
   const fulfillmentOptions = productFulfillmentOptions(product);
   const defaultFulfillment = normalizeFulfillment(product);
-  const soldOut = Boolean(product.soldOut || product.stock < 1);
+  const soldOut = isSoldOut(product);
   const maxPurchase = Math.max(1, Math.min(product.maxPurchase || 5, product.stock || 1));
   const galleryPositions = product.galleryPositions || [product.imagePosition || "65% center", "50% center", "82% center"];
   const galleryImages = galleryPositions.map((position, index) => ({
@@ -861,15 +890,16 @@ function renderCart() {
   const cart = readCart();
   const allRows = cart.map((item) => ({ ...item, product: products.find((product) => product.id === item.id) })).filter((item) => item.product);
   const rows = allRows.filter((item) => item.fulfillment === activeCartFulfillment);
-  const activeKeys = new Set(rows.map(cartItemKey));
+  const orderableRows = rows.filter((item) => !isSoldOut(item.product));
+  const activeKeys = new Set(orderableRows.map(cartItemKey));
   if (selectedCartKeys === null) selectedCartKeys = new Set();
   else selectedCartKeys = new Set([...selectedCartKeys].filter((key) => activeKeys.has(key)));
   const selectedRows = rows.filter((item) => selectedCartKeys.has(cartItemKey(item)));
   const selectedPickupWindow = activeCartFulfillment === "pickup" && selectedRows.length ? pickupWindowIntersection(selectedRows) : null;
-  const allPickupWindow = activeCartFulfillment === "pickup" && rows.length ? pickupWindowIntersection(rows) : null;
+  const allPickupWindow = activeCartFulfillment === "pickup" && orderableRows.length ? pickupWindowIntersection(orderableRows) : null;
   const selectedTotal = selectedRows.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const allTotal = rows.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const allDeliveryFee = activeCartFulfillment === "delivery" && rows.length ? DELIVERY_FEE : 0;
+  const allTotal = orderableRows.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const allDeliveryFee = activeCartFulfillment === "delivery" && orderableRows.length ? DELIVERY_FEE : 0;
   const pickupCount = allRows.filter((item) => item.fulfillment === "pickup").length;
   const deliveryCount = allRows.filter((item) => item.fulfillment === "delivery").length;
   pageContent.innerHTML = `
@@ -881,23 +911,24 @@ function renderCart() {
       </div>
       ${rows.length ? `
         <div class="cart-toolbar">
-          <label><input id="cartSelectAll" type="checkbox" ${selectedRows.length === rows.length ? "checked" : ""} /> 전체선택 <span>${selectedRows.length}개 선택</span></label>
+          <label><input id="cartSelectAll" type="checkbox" ${orderableRows.length && selectedRows.length === orderableRows.length ? "checked" : ""} ${orderableRows.length ? "" : "disabled"} /> 전체선택 <span>${selectedRows.length}개 선택</span></label>
           <button class="selection-delete-button" id="deleteSelected" type="button" ${selectedRows.length ? "" : "disabled"}>선택삭제</button>
         </div>
         <div class="cart-list">${rows.map((item) => {
           const { product, quantity } = item;
           const key = cartItemKey(item);
           const canChange = productFulfillmentOptions(product).length > 1;
+          const soldOut = isSoldOut(product);
           return `
-          <article class="cart-row" data-cart-key="${key}">
-            <label class="cart-select"><input type="checkbox" data-cart-select="${key}" ${selectedCartKeys.has(key) ? "checked" : ""} aria-label="${product.name} 선택" /></label>
+          <article class="cart-row${soldOut ? " is-soldout" : ""}" data-cart-key="${key}">
+            <label class="cart-select"><input type="checkbox" data-cart-select="${key}" ${selectedCartKeys.has(key) ? "checked" : ""} ${soldOut ? "disabled" : ""} aria-label="${product.name} 선택" /></label>
             ${productImage(product)}
-            <div class="cart-product"><span class="product-category">${product.category1} &gt; ${product.category2}</span><a href="?view=product&id=${product.id}">${product.name}</a><span class="product-pricing cart-product-pricing">${productListPrice(product)}</span><div class="cart-fulfillment">${fulfillmentBadges(product, item.fulfillment)}${item.fulfillment === "pickup" ? `<span>${pickupPeriodText(product.pickupStart, product.pickupEnd)}</span>` : ""}${canChange ? `<button type="button" data-change-fulfillment="${key}">변경</button>` : ""}</div></div>
+            <div class="cart-product"><span class="product-category">${product.category1} &gt; ${product.category2}</span><a href="?view=product&id=${product.id}">${product.name}</a>${soldOut ? `<span class="cart-soldout-notice">품절 · 주문할 수 없습니다.</span>` : ""}<span class="product-pricing cart-product-pricing">${productListPrice(product)}</span><div class="cart-fulfillment">${fulfillmentBadges(product, item.fulfillment)}${item.fulfillment === "pickup" ? `<span>${pickupPeriodText(product.pickupStart, product.pickupEnd)}</span>` : ""}${canChange && !soldOut ? `<button type="button" data-change-fulfillment="${key}">변경</button>` : ""}</div></div>
             <div class="cart-row-controls">
               <div class="cart-quantity-stepper" aria-label="${product.name} 수량 조절">
-                <button type="button" data-cart-quantity-action="minus" data-cart-key="${key}" aria-label="수량 줄이기" ${quantity <= 1 ? "disabled" : ""}>−</button>
+                <button type="button" data-cart-quantity-action="minus" data-cart-key="${key}" aria-label="수량 줄이기" ${soldOut || quantity <= 1 ? "disabled" : ""}>−</button>
                 <span>${quantity}</span>
-                <button type="button" data-cart-quantity-action="plus" data-cart-key="${key}" aria-label="수량 늘리기" ${quantity >= Math.max(1, Math.min(product.maxPurchase || 5, product.stock || 1)) ? "disabled" : ""}>+</button>
+                <button type="button" data-cart-quantity-action="plus" data-cart-key="${key}" aria-label="수량 늘리기" ${soldOut || quantity >= Math.max(1, Math.min(product.maxPurchase || 5, product.stock || 1)) ? "disabled" : ""}>+</button>
               </div>
               <strong class="cart-line-total">${formatPrice(product.price * quantity)}</strong>
             </div>
@@ -911,7 +942,7 @@ function renderCart() {
             <span class="cart-summary-total">총 주문금액 <strong>${formatPrice(allTotal + allDeliveryFee)}</strong></span>
             ${activeCartFulfillment === "pickup" ? `<span class="cart-summary-pickup">${allPickupWindow ? `공통 픽업가능일 <strong>${pickupPeriodText(allPickupWindow.start, allPickupWindow.end)}</strong>` : `공통 픽업가능일이 없습니다. 상품을 나눠 선택해주세요.`}</span>` : ""}
           </div>
-          <div class="cart-order-actions"><button class="secondary-button" id="orderSelected" type="button" ${selectedRows.length && (activeCartFulfillment !== "pickup" || selectedPickupWindow) ? "" : "disabled"}>선택상품 주문</button><button class="primary-button" id="orderAll" type="button" ${activeCartFulfillment === "pickup" && !allPickupWindow ? "disabled" : ""}>전체주문</button></div>
+          <div class="cart-order-actions"><button class="secondary-button" id="orderSelected" type="button" ${selectedRows.length && (activeCartFulfillment !== "pickup" || selectedPickupWindow) ? "" : "disabled"}>선택상품 주문</button><button class="primary-button" id="orderAll" type="button" ${orderableRows.length && (activeCartFulfillment !== "pickup" || allPickupWindow) ? "" : "disabled"}>전체주문</button></div>
         </div>` : `<div class="empty-state"><strong>${fulfillmentName(activeCartFulfillment)} 장바구니가 비어 있습니다.</strong><p>다른 탭을 확인하거나 상품을 담아 주세요.</p><a class="primary-button" href="?view=catalog">상품 보러가기</a></div>`}
     </section>`;
 
@@ -922,8 +953,8 @@ function renderCart() {
   }));
   const selectAll = document.querySelector("#cartSelectAll");
   if (selectAll) {
-    selectAll.indeterminate = selectedRows.length > 0 && selectedRows.length < rows.length;
-    selectAll.addEventListener("change", () => { selectedCartKeys = selectAll.checked ? new Set(rows.map(cartItemKey)) : new Set(); renderCart(); });
+    selectAll.indeterminate = selectedRows.length > 0 && selectedRows.length < orderableRows.length;
+    selectAll.addEventListener("change", () => { selectedCartKeys = selectAll.checked ? new Set(orderableRows.map(cartItemKey)) : new Set(); renderCart(); });
   }
   document.querySelectorAll("[data-cart-select]").forEach((checkbox) => checkbox.addEventListener("change", () => {
     const key = checkbox.dataset.cartSelect;
@@ -957,10 +988,11 @@ function renderCart() {
     if (item) openFulfillmentChangeModal(item);
   }));
   document.querySelector("#orderSelected")?.addEventListener("click", () => saveOrderDraft(selectedRows.map(({ id, quantity, fulfillment }) => ({ id, quantity, fulfillment })), "cart-selected", activeCartFulfillment));
-  document.querySelector("#orderAll")?.addEventListener("click", () => saveOrderDraft(rows.map(({ id, quantity, fulfillment }) => ({ id, quantity, fulfillment })), "cart-all", activeCartFulfillment));
+  document.querySelector("#orderAll")?.addEventListener("click", () => saveOrderDraft(orderableRows.map(({ id, quantity, fulfillment }) => ({ id, quantity, fulfillment })), "cart-all", activeCartFulfillment));
   bindNoticeButtons();
 }
 function renderOrder() {
+  if (!ensureOrderMember()) return;
   const draft = readOrderDraft();
   const rows = orderRowsFromDraft(draft);
   const lockedFulfillment = draft.fulfillment || rows[0]?.fulfillment || null;
@@ -1101,6 +1133,7 @@ function renderOrder() {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+    if (!ensureOrderMember()) return;
     const fulfillment = form.elements.fulfillment.value;
     const payment = fulfillment === "delivery" ? "card" : form.elements.payment.value;
     const customerName = document.querySelector("#customerName").value.trim();
