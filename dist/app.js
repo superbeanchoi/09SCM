@@ -925,8 +925,8 @@ function renderCart() {
           return `
           <article class="cart-row${soldOut ? " is-soldout" : ""}" data-cart-key="${key}">
             <label class="cart-select"><input type="checkbox" data-cart-select="${key}" ${selectedCartKeys.has(key) ? "checked" : ""} ${soldOut ? "disabled" : ""} aria-label="${product.name} 선택" /></label>
-            ${productImage(product)}
-            <div class="cart-product"><span class="product-category">${product.category1} &gt; ${product.category2}</span><a href="?view=product&id=${product.id}">${product.name}</a>${soldOut ? `<span class="cart-soldout-notice">품절 · 주문할 수 없습니다.</span>` : ""}<span class="product-pricing cart-product-pricing">${productListPrice(product)}</span><div class="cart-fulfillment">${fulfillmentBadges(product, item.fulfillment)}${item.fulfillment === "pickup" ? `<span>${pickupPeriodText(product.pickupStart, product.pickupEnd)}</span>` : ""}${canChange && !soldOut ? `<button type="button" data-change-fulfillment="${key}">변경</button>` : ""}</div></div>
+            <div class="cart-image-wrap">${productImage(product)}${soldOut ? `<span class="product-soldout-badge">품절</span>` : ""}</div>
+            <div class="cart-product"><span class="product-category">${product.category1} &gt; ${product.category2}</span><a href="?view=product&id=${product.id}">${product.name}</a><span class="product-pricing cart-product-pricing">${productListPrice(product)}</span><div class="cart-fulfillment">${fulfillmentBadges(product, item.fulfillment)}${item.fulfillment === "pickup" ? `<span>${pickupPeriodText(product.pickupStart, product.pickupEnd)}</span>` : ""}${canChange && !soldOut ? `<button type="button" data-change-fulfillment="${key}">변경</button>` : ""}</div></div>
             <div class="cart-row-controls">
               <div class="cart-quantity-stepper" aria-label="${product.name} 수량 조절">
                 <button type="button" data-cart-quantity-action="minus" data-cart-key="${key}" aria-label="수량 줄이기" ${soldOut || quantity <= 1 ? "disabled" : ""}>−</button>
