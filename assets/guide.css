@@ -326,6 +326,7 @@ details.guide-more[open] > summary { margin-bottom: 8px; }
 
 .guide-section table.tpl { table-layout: fixed; }
 .guide-section table.tpl th { white-space: normal; word-break: keep-all; }
+.guide-section th { vertical-align: middle; }
 .guide-section table.tpl td:first-child { min-width: 0; }
 .guide-section table.wide { min-width: 560px; }
 .guide-section table.t2 { min-width: 0 !important; }
