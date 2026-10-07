@@ -113,7 +113,10 @@ a { color: inherit; }
 .home-grid { margin-top: 24px; }
 .system-card h2 { font-size: 20px; font-weight: 700; margin: 0 0 8px; }
 .system-card p { margin: 0 0 20px; color: var(--text-secondary); min-height: 42px; }
-.card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.card-actions { display: flex; gap: 8px; }
+.card-actions > .btn-primary, .card-actions > .btn-secondary { flex: 1 1 0; min-width: 0; width: 100%; }
+body.home { min-height: 100vh; display: flex; flex-direction: column; }
+body.home .content-wrapper { flex: 1; }
 .site-footer {
   border-top: 1px solid var(--border);
   padding: 20px 24px;
@@ -146,6 +149,10 @@ a { color: inherit; }
   padding: 0 20px;
   border-bottom: 1px solid var(--border);
   text-decoration: none;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface);
 }
 .lnb-logo .mark { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
 .lnb-logo .sub { font-size: 12px; font-weight: 300; color: var(--text-secondary); white-space: nowrap; }
@@ -189,7 +196,7 @@ a { color: inherit; }
 .submenu .menu-item.active::before { background: var(--key); }
 .submenu .submenu { padding-left: 16px; }
 
-.lnb-footer { padding: 14px 16px 18px; border-top: 1px solid var(--border); }
+.lnb-footer { padding: 14px 16px 18px; border-top: 1px solid var(--border); position: sticky; bottom: 0; z-index: 2; background: var(--surface); }
 .lnb-footer .btn-secondary { width: 100%; height: 38px; font-size: 12px; }
 
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -209,17 +216,9 @@ a { color: inherit; }
 
 /* ---------- 가이드 본문 구조 ---------- */
 .screen-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-bottom: 16px; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+.screen-head { flex-direction: column; align-items: flex-start; gap: 4px; }
+.screen-head .eyebrow { font-size: 12px; font-weight: 300; color: var(--text-secondary); }
 .screen-head h1 { font-size: 24px; font-weight: 700; margin: 0; }
-.badge-slot {
-  height: 24px;
-  padding: 0 10px;
-  border: 1px dashed var(--border);
-  border-radius: 4px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  display: inline-flex;
-  align-items: center;
-}
 
 .guide-section { margin-bottom: 24px; }
 .guide-section > h2 {

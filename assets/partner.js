@@ -113,8 +113,8 @@
     return -1;
   }
 
-  function fullTitle(leaf) {
-    return leaf.trail.map(function (t) { return t.label; }).concat(leaf.label).join(' > ');
+  function subTrail(leaf) {
+    return leaf.trail.slice(1).map(function (t) { return t.label; }).join(' > ');
   }
 
   function sectionHTML(id, label, body) {
@@ -138,11 +138,11 @@
       if (group) group.classList.add('open');
     });
 
-    titleEl.textContent = fullTitle(leaf);
+    titleEl.textContent = leaf.trail[0].label;
     document.title = leaf.label + ' | 09SCM 이용가이드';
 
-    var head = '<div class="screen-head"><h1></h1>' +
-      (leaf.type === 'page' ? '' : '<span class="badge-slot">대상 표기</span>') + '</div>';
+    var sub = subTrail(leaf);
+    var head = '<div class="screen-head">' + (sub ? '<span class="eyebrow"></span>' : '') + '<h1></h1></div>';
 
     var main = '';
     var toc = '';
@@ -171,6 +171,8 @@
         '<aside class="mini-col col-4"><div class="mini-toc"><h3>이 화면에서</h3>' + toc + '</div></aside>' +
       '</div>';
     contentEl.querySelector('.screen-head h1').textContent = leaf.label;
+    var eb = contentEl.querySelector('.screen-head .eyebrow');
+    if (eb) eb.textContent = sub;
 
     contentEl.querySelectorAll('[data-go]').forEach(function (btn) {
       btn.addEventListener('click', function () { location.hash = btn.dataset.go; });
