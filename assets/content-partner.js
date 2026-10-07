@@ -109,7 +109,7 @@ window.GUIDE_CONTENT['dashboard-ops'] = {
         '<tr><td>도매 구매 > 취소·반품요청</td><td>내가 구매자인 도매 취소·반품 요청 중 아직 처리되지 않은 건수</td></tr>' +
         '<tr><td>결제대기</td><td>도소매 주문 중 결제가 아직 완료되지 않은 건수</td></tr>' +
       '</tbody></table></div>' +
-    '<p>[주문목록보기]를 누르면 해당 섹션별 전체 목록으로 이동해요.</p>' +
+    '<p>[주문목록보기]를 누르면 해당 섹션별 전체 주문 목록으로 이동해요.</p>' +
 
     '<h3>매출추이</h3>' +
     '<div class="table-wrap"><table class="wide">' +
@@ -117,15 +117,16 @@ window.GUIDE_CONTENT['dashboard-ops'] = {
       '<tbody>' +
         '<tr><td>매출액</td><td>결제총액(선택한 기간에 결제가 완료된 금액 합계) − 취소·환불액(선택한 기간에 취소·반품이 승인된 금액 합계)</td></tr>' +
         '<tr><td>결제 건수</td><td>선택한 기간에 결제가 완료된 주문 수</td></tr>' +
+        '<tr><td>차트</td><td>이번주는 요일별, 이번달은 주별 매출액 표시</td></tr>' +
       '</tbody></table></div>' +
 
     '<h3>공지사항</h3>' +
     '<div class="table-wrap"><table class="wide">' +
       '<thead><tr><th>항목</th><th>설명</th></tr></thead>' +
       '<tbody>' +
-        '<tr><td>태그</td><td>공지를 쓴 곳이에요. 09SCM 또는 우리본사로 표시돼요.</td></tr>' +
-        '<tr><td>제목</td><td>공지 제목이에요. 누르면 공지 상세로 이동해요.</td></tr>' +
-        '<tr><td>날짜</td><td>공지를 등록한 날짜예요.</td></tr>' +
+        '<tr><td>태그</td><td>공지를 쓴 곳 (09SCM 또는 우리본사)</td></tr>' +
+        '<tr><td>제목</td><td>공지 제목 (누르면 공지 상세로 이동)</td></tr>' +
+        '<tr><td>날짜</td><td>공지를 등록한 날짜</td></tr>' +
       '</tbody></table></div>' +
     '<p>[전체보기]를 누르면 시스템관리 > 공지사항 목록으로 이동해요.</p>' +
 
@@ -137,7 +138,7 @@ window.GUIDE_CONTENT['dashboard-ops'] = {
         '<tr><td>순위</td><td>판매금액이 큰 순서</td></tr>' +
         '<tr><td>상품명</td><td>판매된 상품 이름</td></tr>' +
         '<tr><td>주문건수</td><td>해당 상품이 들어 있는 주문의 수</td></tr>' +
-        '<tr><td>판매금액</td><td>상품 단가 × 판매 수량의 합계 / 배송비와 배달비는 포함되지 않음</td></tr>' +
+        '<tr><td>판매금액</td><td>상품 단가 × 판매 수량의 합계 (배송비와 배달비는 포함되지 않음)</td></tr>' +
       '</tbody></table></div>',
   cases:
     '<h3>도매공급권한에 따라 달라져요</h3>' +
