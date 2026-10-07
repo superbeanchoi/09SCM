@@ -178,6 +178,15 @@
   document.getElementById('menuBtn').addEventListener('click', function () { appEl.classList.add('nav-open'); });
   document.getElementById('scrim').addEventListener('click', function () { appEl.classList.remove('nav-open'); });
 
+  /* ---------- 푸터(타이틀 · 배포 버전 · 배포일) ---------- */
+  var rel = window.GUIDE_RELEASE;
+  if (rel) {
+    var ft = document.createElement('footer');
+    ft.className = 'site-footer';
+    ft.textContent = rel.title + ' · ' + rel.version + ' · ' + rel.date;
+    document.querySelector('.main').appendChild(ft);
+  }
+
   /* ---------- 키워드 검색 (현재 가이드 안에서만) ---------- */
   var searchIndex = null;
   var searchEl, inputEl, listEl, results = [], activeIdx = -1;

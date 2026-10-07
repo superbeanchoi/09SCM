@@ -59,7 +59,14 @@
     </section>
   </main>
 
-  <footer class="site-footer">09SCM</footer>
+  <footer class="site-footer" id="siteFooter">09SCM 이용가이드</footer>
+  <script src="./assets/version.js"></script>
+  <script>
+    (function () {
+      var r = window.GUIDE_RELEASE;
+      if (r) document.getElementById('siteFooter').textContent = r.title + ' · ' + r.version + ' · ' + r.date;
+    })();
+  </script>
 
   <script>
     document.querySelectorAll('[data-soon]').forEach(function (button) {
