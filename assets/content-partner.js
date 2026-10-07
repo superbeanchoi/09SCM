@@ -7,7 +7,7 @@ var FRANCHISE_APPLY = 'https://superbeanchoi.github.io/09SCM-Shop/index.html?vie
 
 window.GUIDE_CONTENT['start-intro'] = {
   shots: [
-    { device: 'pc', src: '../assets/img/partner/intro-pc.webp', alt: '09SCM 관리자 대시보드 화면', caption: '본사 계정으로 로그인한 대시보드 화면' }
+    { device: 'pc', src: '../assets/img/partner/intro-pc.webp', alt: '09SCM 관리자 대시보드 화면', caption: '09SCM 대시보드 화면' }
   ],
   sections: [
     { id: 'sec1', label: "09SCM 관리자란", html:

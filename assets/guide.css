@@ -297,7 +297,7 @@ details.guide-more[open] > summary { margin-bottom: 8px; }
 }
 
 /* 대표 화면 캡처 */
-.shot { margin-bottom: 24px; }
+.shot { margin-bottom: 32px; }
 .shot-item { margin: 0; }
 .shot-item img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--surface, #fff); }
 .shot-item figcaption { margin-top: 8px; font-size: 12px; font-weight: 300; color: var(--text-secondary); }
@@ -326,3 +326,6 @@ details.guide-more[open] > summary { margin-bottom: 8px; }
 
 .guide-section table.wide { min-width: 560px; }
 .guide-section td:first-child { word-break: keep-all; min-width: 72px; }
+
+.shot + .guide-section { border-top: 1px solid var(--border); padding-top: 32px; }
+.guide-section { scroll-margin-top: var(--topbar-h); }
