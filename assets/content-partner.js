@@ -141,6 +141,7 @@ window.GUIDE_CONTENT['dashboard-ops'] = {
       '</tbody></table></div>',
   cases:
     '<h3>도매공급권한에 따라 달라져요</h3>' +
+    '<p>도매 판매는 내가 공급자인 주문, 도매 구매는 내가 구매자인 주문이에요.</p>' +
     '<div class="table-wrap"><table class="wide">' +
       '<thead><tr><th>영역</th><th>도매공급권한 있음(본사 포함)</th><th>도매공급권한 없음</th></tr></thead>' +
       '<tbody>' +
@@ -149,7 +150,6 @@ window.GUIDE_CONTENT['dashboard-ops'] = {
         '<tr><td>처리 필요 > 도매 구매</td><td>○</td><td>○</td></tr>' +
         '<tr><td>매출추이·이번주 판매현황의 도매 탭</td><td>○</td><td>×</td></tr>' +
       '</tbody></table></div>' +
-    '<p>도매 판매는 내가 공급자인 주문, 도매 구매는 내가 구매자인 주문이에요.</p>' +
 
     '<h3>이용상태에 따라 달라져요</h3>' +
     '<p>이용대기 상태의 가맹점에는 대시보드가 보이지 않고 시스템관리만 쓸 수 있어요. 자세한 내용은 <a href="#start-login">가입신청·로그인</a>에서 확인해요.</p>'
