@@ -22,7 +22,7 @@ def login_box(page, name):
 
 with sync_playwright() as p:
     b = p.chromium.launch()
-    for label, w in (('pc', 1440), ('mobile', 440)):
+    for label, w in (('pc', 1440),):
         ctx = b.new_context(viewport={'width': w, 'height': 900}, device_scale_factor=2)
         page = ctx.new_page()
         page.goto(URL); page.wait_for_timeout(500)

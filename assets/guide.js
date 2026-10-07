@@ -76,12 +76,13 @@
     return '<section class="guide-section" id="' + id + '"><h2>' + label + '</h2>' + body + '</section>';
   }
 
-  function shotsHTML(shots) {
+  function shotsHTML(shots, caption) {
     if (!shots || !shots.length) { return ''; }
     var items = shots.map(function (s) {
-      return '<figure class="shot-item shot-' + s.device + '"><img src="' + s.src + '" alt="' + s.alt + '" loading="lazy"><figcaption>' + s.caption + '</figcaption></figure>';
+      return '<figure class="shot-item shot-' + s.device + '"><img src="' + s.src + '" alt="' + s.alt + '" loading="lazy"></figure>';
     }).join('');
-    return '<div class="shot' + (shots.length > 1 ? ' shot-pair' : '') + '">' + items + '</div>';
+    return '<div class="shot"><div class="shot-row' + (shots.length > 1 ? ' shot-pair' : '') + '">' + items + '</div>' +
+      (caption ? '<p class="shot-caption">' + caption + '</p>' : '') + '</div>';
   }
 
   function placeholder() {
@@ -111,7 +112,7 @@
     var main = '';
     var toc = '';
     var c = (window.GUIDE_CONTENT || {})[leaf.id];
-    var shots = c ? shotsHTML(c.shots) : '';
+    var shots = c ? shotsHTML(c.shots, c.shotCaption) : '';
     if (leaf.type === 'page') {
       var secs = c && c.sections ? c.sections : [{ id: 'body', label: leaf.label, html: placeholder() }];
       secs.forEach(function (s) {

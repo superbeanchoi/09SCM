@@ -300,8 +300,9 @@ details.guide-more[open] > summary { margin-bottom: 8px; }
 .shot { margin-bottom: 32px; }
 .shot-item { margin: 0; }
 .shot-item img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--surface, #fff); }
-.shot-item figcaption { margin-top: 8px; font-size: 12px; font-weight: 300; color: var(--text-secondary); }
+.shot-caption { margin: 8px 0 0; font-size: 12px; font-weight: 300; color: var(--text-secondary); }
 .shot-pair { display: flex; gap: 16px; align-items: flex-end; }
+.guide-section .shot-caption { margin: 8px 0 0; }
 .shot-pair .shot-pc { flex: 1 1 0; min-width: 0; }
 .shot-pair .shot-mobile { flex: 0 0 34%; min-width: 0; }
 @media (max-width: 860px) {
