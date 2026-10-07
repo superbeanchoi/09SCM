@@ -17,6 +17,10 @@ def login_full(page, name):
     page.evaluate("document.activeElement && document.activeElement.blur()")
     save(page.screenshot(), name)
 
+def login(page):
+    page.fill('#loginIdInput', 'bonsa'); page.fill('#loginPwInput', 'a1234')
+    page.click('#loginSubmitBtn'); page.wait_for_timeout(800)
+
 with sync_playwright() as p:
     b = p.chromium.launch()
     for label, w in (('pc', 1440),):
@@ -29,4 +33,15 @@ with sync_playwright() as p:
             page.click('#loginSubmitBtn'); page.wait_for_timeout(800)
             save(page.screenshot(), 'intro-pc')
         ctx.close()
+    # 대시보드: LNB 제외 PC(1440) + 모바일(440)
+    ctx = b.new_context(viewport={'width': 1440, 'height': 1500}, device_scale_factor=2)
+    page = ctx.new_page(); page.goto(URL); page.wait_for_timeout(500); login(page)
+    page.add_style_tag(content='.lnb{display:none!important}')
+    page.wait_for_timeout(200)
+    save(page.screenshot(), 'dashboard-pc')
+    ctx.close()
+    ctx = b.new_context(viewport={'width': 440, 'height': 900}, device_scale_factor=2)
+    page = ctx.new_page(); page.goto(URL); page.wait_for_timeout(500); login(page)
+    save(page.screenshot(), 'dashboard-mobile')
+    ctx.close()
     b.close()
