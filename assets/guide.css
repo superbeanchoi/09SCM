@@ -97,6 +97,8 @@ a { color: inherit; }
 .col-4 { grid-column: span 4; }
 .col-6 { grid-column: span 6; }
 .col-8 { grid-column: span 8; }
+.col-9 { grid-column: span 9; }
+.col-3 { grid-column: span 3; }
 .col-12 { grid-column: span 12; }
 
 .card {
@@ -220,13 +222,12 @@ body.home .content-wrapper { flex: 1; }
 .screen-head .eyebrow { font-size: 12px; font-weight: 300; color: var(--text-secondary); }
 .screen-head h1 { font-size: 24px; font-weight: 700; margin: 0; }
 
-.guide-section { margin-bottom: 24px; }
+.guide-section { margin: 0; padding: 32px 0; border-top: 1px solid var(--border); }
+.guide-section:first-of-type { border-top: 0; padding-top: 0; }
 .guide-section > h2 {
   font-size: 20px;
   font-weight: 700;
   margin: 0 0 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
 }
 .placeholder {
   min-height: 96px;
@@ -292,7 +293,7 @@ details.guide-more[open] > summary { margin-bottom: 8px; }
   .menu-btn { display: flex; }
   .topbar { padding: 0 16px; }
   .content-wrapper { padding: 16px 16px 40px; }
-  .col-4, .col-6, .col-8 { grid-column: span 12; }
+  .col-3, .col-4, .col-6, .col-8, .col-9 { grid-column: span 12; }
 }
 
 /* 대표 화면 캡처 */

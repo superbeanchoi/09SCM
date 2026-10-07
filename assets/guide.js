@@ -113,8 +113,11 @@
     var c = (window.GUIDE_CONTENT || {})[leaf.id];
     var shots = c ? shotsHTML(c.shots) : '';
     if (leaf.type === 'page') {
-      main = sectionHTML('body', '본문', c && c.body ? c.body : placeholder());
-      toc = '<a href="#body" data-anchor="body">본문</a>';
+      var secs = c && c.sections ? c.sections : [{ id: 'body', label: leaf.label, html: placeholder() }];
+      secs.forEach(function (s) {
+        main += sectionHTML(s.id, s.label, s.html);
+        toc += '<a href="#' + s.id + '" data-anchor="' + s.id + '">' + s.label + '</a>';
+      });
     } else {
       SCREEN_SECTIONS.forEach(function (s) {
         if (c && !c[s.id]) { return; }
@@ -137,8 +140,8 @@
 
     contentEl.innerHTML =
       '<div class="grid12">' +
-        '<div class="main-col col-8">' + head + main + pager + '</div>' +
-        '<aside class="mini-col col-4"><div class="mini-toc"><h3>이 화면에서</h3>' + toc + '</div></aside>' +
+        '<div class="main-col col-9">' + head + main + pager + '</div>' +
+        '<aside class="mini-col col-3"><div class="mini-toc"><h3>이 화면에서</h3>' + toc + '</div></aside>' +
       '</div>';
     contentEl.querySelector('.screen-head h1').textContent = leaf.label;
     var eb = contentEl.querySelector('.screen-head .eyebrow');
