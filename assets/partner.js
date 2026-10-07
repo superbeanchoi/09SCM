@@ -133,6 +133,7 @@
     document.querySelectorAll('.menu-item.active').forEach(function (el) { el.classList.remove('active'); });
     var active = menuEl.querySelector('.menu-item[data-id="' + leaf.id + '"]');
     if (active) active.classList.add('active');
+    menuEl.querySelectorAll('.menu-group.open').forEach(function (g) { g.classList.remove('open'); });
     leaf.trail.forEach(function (t) {
       var group = menuEl.querySelector('.menu-group[data-id="' + t.id + '"]');
       if (group) group.classList.add('open');
