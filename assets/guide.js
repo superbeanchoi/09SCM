@@ -157,6 +157,8 @@
       });
     });
 
+    applyTableTemplate(contentEl);
+
     window.scrollTo(0, 0);
     appEl.classList.remove('nav-open');
     if (secId) {
@@ -167,6 +169,47 @@
         t.scrollIntoView({ block: 'start' });
       }
     }
+  }
+
+  /* ---------- 표 템플릿: 컬럼 유형별 폭·정렬 ---------- */
+  // 항목(1열) 200px 고정·왼쪽 / 기호(○ × 등) 140px 고정·가운데 / 짧은 값(6자 이하) 120px 고정·왼쪽 / 그 외 가변·왼쪽
+  // 가변 컬럼이 없으면 1열이 가변(최소 200px). 표 최소 폭은 컬럼 폭 합계이며 좁으면 .table-wrap 안에서 가로 스크롤.
+  function applyTableTemplate(root) {
+    var MARK = /^[○×△◎●\-–]$/;
+    root.querySelectorAll('.guide-section table').forEach(function (tb) {
+      var rows = tb.querySelectorAll('tbody tr');
+      var n = tb.querySelectorAll('thead th').length;
+      if (!rows.length || !n) return;
+      var kinds = [];
+      for (var c = 0; c < n; c++) {
+        var cells = [];
+        rows.forEach(function (r) { if (r.children[c]) cells.push(txt(r.children[c])); });
+        var kind = 'text';
+        if (cells.every(function (v) { return MARK.test(v); })) kind = 'mark';
+        else if (c > 0 && cells.every(function (v) { return v.length <= 6; })) kind = 'short';
+        if (c === 0) kind = kind === 'mark' ? 'mark' : 'item';
+        kinds.push(kind);
+      }
+      var hasFlex = kinds.indexOf('text') > -1;
+      var fixed = 0, flexMin = 240;
+      var cg = document.createElement('colgroup');
+      kinds.forEach(function (k, i) {
+        var col = document.createElement('col');
+        if (k === 'mark') { col.style.width = '140px'; fixed += 140; }
+        else if (k === 'short') { col.style.width = '120px'; fixed += 120; }
+        else if (k === 'item') {
+          if (hasFlex) { col.style.width = '200px'; fixed += 200; } else { flexMin = 200; }
+        }
+        cg.appendChild(col);
+        tb.querySelectorAll('tr').forEach(function (r) {
+          if (r.children[i] && k === 'mark') r.children[i].classList.add('c');
+        });
+      });
+      tb.insertBefore(cg, tb.firstChild);
+      tb.classList.add('tpl');
+      if (kinds.length === 2 && kinds[0] === 'item') tb.classList.add('t2'); // 2열 설명표는 좁은 화면에서도 스크롤 없이 표시
+      else tb.style.minWidth = Math.max(560, fixed + flexMin) + 'px';
+    });
   }
 
   function route() {

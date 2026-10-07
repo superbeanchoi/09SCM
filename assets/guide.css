@@ -324,7 +324,12 @@ details.guide-more[open] > summary { margin-bottom: 8px; }
 .link-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 0; }
 .link-row a { display: inline-flex; align-items: center; height: 38px; padding: 0 16px; border: 1px solid var(--border); border-radius: 4px; text-decoration: none; font-weight: 700; }
 
+.guide-section table.tpl { table-layout: fixed; }
+.guide-section table.tpl th { white-space: normal; word-break: keep-all; }
+.guide-section table.tpl td:first-child { min-width: 0; }
 .guide-section table.wide { min-width: 560px; }
+.guide-section table.t2 { min-width: 0 !important; }
+@media (max-width: 860px) { .guide-section table.t2 col:first-child { width: 112px !important; } }
 .guide-section td:first-child { word-break: keep-all; min-width: 72px; }
 
 .shot + .guide-section { border-top: 1px solid var(--border); padding-top: 32px; }
