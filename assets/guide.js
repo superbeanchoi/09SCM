@@ -76,6 +76,14 @@
     return '<section class="guide-section" id="' + id + '"><h2>' + label + '</h2>' + body + '</section>';
   }
 
+  function shotsHTML(shots) {
+    if (!shots || !shots.length) { return ''; }
+    var items = shots.map(function (s) {
+      return '<figure class="shot-item shot-' + s.device + '"><img src="' + s.src + '" alt="' + s.alt + '" loading="lazy"><figcaption>' + s.caption + '</figcaption></figure>';
+    }).join('');
+    return '<div class="shot' + (shots.length > 1 ? ' shot-pair' : '') + '">' + items + '</div>';
+  }
+
   function placeholder() {
     return '<div class="placeholder">내용 작성 예정</div>';
   }
@@ -102,17 +110,23 @@
 
     var main = '';
     var toc = '';
+    var c = (window.GUIDE_CONTENT || {})[leaf.id];
+    var shots = c ? shotsHTML(c.shots) : '';
     if (leaf.type === 'page') {
-      main = sectionHTML('body', '본문', placeholder());
+      main = sectionHTML('body', '본문', c && c.body ? c.body : placeholder());
       toc = '<a href="#body" data-anchor="body">본문</a>';
     } else {
       SCREEN_SECTIONS.forEach(function (s) {
-        main += sectionHTML(s.id, s.label, placeholder());
+        if (c && !c[s.id]) { return; }
+        main += sectionHTML(s.id, s.label, c ? c[s.id] : placeholder());
         toc += '<a href="#' + s.id + '" data-anchor="' + s.id + '">' + s.label + '</a>';
       });
-      main += '<section class="guide-section" id="more"><details class="guide-more"><summary>더 자세히 보기</summary>' + placeholder() + '</details></section>';
-      toc += '<a href="#more" data-anchor="more">더 자세히 보기</a>';
+      if (!c || c.more) {
+        main += '<section class="guide-section" id="more"><details class="guide-more"><summary>더 자세히 보기</summary>' + (c ? c.more : placeholder()) + '</details></section>';
+        toc += '<a href="#more" data-anchor="more">더 자세히 보기</a>';
+      }
     }
+    main = shots + main;
 
     var prev = leaves[index - 1];
     var next = leaves[index + 1];
