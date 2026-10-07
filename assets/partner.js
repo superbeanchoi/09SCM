@@ -161,8 +161,8 @@
     var prev = leaves[index - 1];
     var next = leaves[index + 1];
     var pager = '<nav class="pager">' +
-      (prev ? '<button type="button" class="btn-secondary" data-go="' + prev.id + '">◀ 이전: ' + prev.label + '</button>' : '<span class="spacer"></span>') +
-      (next ? '<button type="button" class="btn-secondary" data-go="' + next.id + '">다음: ' + next.label + ' ▶</button>' : '') +
+      (prev ? '<a href="#' + prev.id + '">◀ ' + prev.label + '</a>' : '<span></span>') +
+      (next ? '<a href="#' + next.id + '">' + next.label + ' ▶</a>' : '') +
       '</nav>';
 
     contentEl.innerHTML =
@@ -174,9 +174,6 @@
     var eb = contentEl.querySelector('.screen-head .eyebrow');
     if (eb) eb.textContent = sub;
 
-    contentEl.querySelectorAll('[data-go]').forEach(function (btn) {
-      btn.addEventListener('click', function () { location.hash = btn.dataset.go; });
-    });
     contentEl.querySelectorAll('[data-anchor]').forEach(function (a) {
       a.addEventListener('click', function (e) {
         e.preventDefault();

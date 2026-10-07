@@ -260,8 +260,8 @@ details.guide-more[open] { padding-bottom: 24px; }
 details.guide-more[open] > summary { margin-bottom: 8px; }
 
 .pager { display: flex; justify-content: space-between; gap: 12px; padding-top: 24px; border-top: 1px solid var(--border); }
-.pager .btn-secondary { max-width: 48%; overflow: hidden; text-overflow: ellipsis; }
-.pager .spacer { flex: 1; }
+.pager a { font-size: 14px; font-weight: 700; color: var(--text-secondary); text-decoration: none; padding: 8px 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pager a:hover { color: var(--text-body); text-decoration: underline; }
 
 .mini-toc { position: sticky; top: calc(var(--topbar-h) + 20px); }
 .mini-toc h3 { font-size: 12px; font-weight: 300; color: var(--text-secondary); margin: 0 0 8px; }
@@ -293,5 +293,4 @@ details.guide-more[open] > summary { margin-bottom: 8px; }
   .topbar { padding: 0 16px; }
   .content-wrapper { padding: 16px 16px 40px; }
   .col-4, .col-6, .col-8 { grid-column: span 12; }
-  .pager .btn-secondary { max-width: 49%; }
 }
