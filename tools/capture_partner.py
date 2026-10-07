@@ -40,7 +40,7 @@ with sync_playwright() as p:
     page.wait_for_timeout(200)
     save(page.screenshot(), 'dashboard-pc')
     ctx.close()
-    ctx = b.new_context(viewport={'width': 440, 'height': 900}, device_scale_factor=2)
+    ctx = b.new_context(viewport={'width': 440, 'height': 1200}, device_scale_factor=2)
     page = ctx.new_page(); page.goto(URL); page.wait_for_timeout(500); login(page)
     save(page.screenshot(), 'dashboard-mobile')
     ctx.close()
