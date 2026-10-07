@@ -3,15 +3,13 @@
 window.GUIDE_NAV = [
   { id: 'start', label: '시작하기', children: [
     { id: 'start-intro', label: '09SCM 소매몰 소개', type: 'page' },
-    { id: 'start-login', label: '회원가입/로그인' },
+    { id: 'start-login', label: '회원가입·로그인' },
     { id: 'start-gate', label: '대문화면' },
     { id: 'start-terms', label: '알아두면 좋은 용어', type: 'page' }
   ]},
   { id: 'browse', label: '둘러보기', children: [
     { id: 'browse-main', label: '메인화면' },
     { id: 'browse-list', label: '상품목록' },
-    { id: 'browse-pickup', label: '픽업상품' },
-    { id: 'browse-delivery', label: '배달상품' },
     { id: 'browse-detail', label: '상품상세' }
   ]},
   { id: 'order', label: '주문하기', children: [
