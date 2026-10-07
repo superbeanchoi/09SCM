@@ -172,7 +172,7 @@
   }
 
   /* ---------- 표 템플릿: 컬럼 유형별 폭·정렬 ---------- */
-  // 항목(1열) 200px 고정·왼쪽 / 기호(○ × 등) 140px 고정·가운데 / 짧은 값(6자 이하) 120px 고정·왼쪽 / 그 외 가변·왼쪽
+  // 항목(1열) 300px 고정·왼쪽 / 기호(○ × 등) 140px 고정·가운데 / 짧은 값(6자 이하) 120px 고정·왼쪽 / 그 외 가변·왼쪽
   // 가변 컬럼이 없으면 1열이 가변(최소 200px). 표 최소 폭은 컬럼 폭 합계이며 좁으면 .table-wrap 안에서 가로 스크롤.
   function applyTableTemplate(root) {
     var MARK = /^[○×△◎●\-–]$/;
@@ -198,7 +198,7 @@
         if (k === 'mark') { col.style.width = '140px'; fixed += 140; }
         else if (k === 'short') { col.style.width = '120px'; fixed += 120; }
         else if (k === 'item') {
-          if (hasFlex) { col.style.width = '200px'; fixed += 200; } else { flexMin = 200; }
+          if (hasFlex) { col.style.width = '300px'; fixed += 300; } else { flexMin = 200; }
         }
         cg.appendChild(col);
         tb.querySelectorAll('tr').forEach(function (r) {
