@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>09SCM 이용가이드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./assets/guide.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html">09SCM<small>이용가이드</small></a>
+  </header>
+
+  <main class="content-wrapper">
+    <section class="home-hero">
+      <h1>09SCM 이용가이드</h1>
+      <p>동네에서 함께 사는 즐거움, 09SCM을 쉽게 사용하는 방법을 안내합니다.</p>
+    </section>
+
+    <section class="grid12 home-grid">
+      <article class="card system-card col-6">
+        <h2>본사·가맹점 관리자</h2>
+        <p>상품, 주문, 회원, 가맹점을 관리하는 화면입니다.</p>
+        <div class="card-actions">
+          <button type="button" class="btn-primary" data-soon>이용가이드 보기</button>
+          <button type="button" class="btn-secondary" data-soon>관리자 화면 체험하기</button>
+        </div>
+      </article>
+
+      <article class="card system-card col-6">
+        <h2>소매몰</h2>
+        <p>소비자가 상품을 고르고 주문하는 화면입니다.</p>
+        <div class="card-actions">
+          <button type="button" class="btn-secondary" data-soon>소매몰 체험하기</button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">09SCM</footer>
+
+  <script>
+    document.querySelectorAll('[data-soon]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        alert('준비 중입니다.');
+      });
+    });
+  </script>
+</body>
+</html>
