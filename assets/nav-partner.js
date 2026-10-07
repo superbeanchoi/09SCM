@@ -4,7 +4,7 @@ window.GUIDE_NAV = [
     { id: 'start', label: '시작하기', children: [
       { id: 'start-intro', label: '09SCM 관리자 소개', type: 'page' },
       { id: 'start-login', label: '가입신청·로그인' },
-      { id: 'start-terms', label: '알아두면 좋은 용어', type: 'page' }
+      { id: 'start-terms', label: '용어집', type: 'page' }
     ]},
     { id: 'dashboard', label: '대시보드', children: [
       { id: 'dashboard-ops', label: '운영현황' }
