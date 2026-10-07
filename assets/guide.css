@@ -330,3 +330,26 @@ details.guide-more[open] > summary { margin-bottom: 8px; }
 
 .shot + .guide-section { border-top: 1px solid var(--border); padding-top: 32px; }
 .guide-section { scroll-margin-top: var(--topbar-h); }
+
+/* ---------- 키워드 검색 ---------- */
+.search { position: relative; }
+.search-btn { display: none; width: 36px; height: 36px; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-body); cursor: pointer; }
+.search-input { width: 260px; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text-body); font: inherit; font-size: 14px; }
+.search-input:focus { outline: none; border-color: var(--key); }
+.search-list { position: absolute; right: 0; top: 44px; width: 420px; max-height: 70vh; overflow-y: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); }
+.search-list[hidden] { display: none; }
+.search-item { display: block; padding: 10px 14px; text-decoration: none; color: var(--text-body); border-bottom: 1px solid var(--border); }
+.search-item:last-child { border-bottom: 0; }
+.search-item.active, .search-item:hover { background: var(--bg); }
+.search-path { display: block; font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+.search-snip { display: block; margin-top: 2px; font-size: 14px; line-height: 1.5; }
+.search-item mark { background: var(--key-tint); color: inherit; border-radius: 2px; padding: 0 1px; }
+.search-empty { padding: 16px 14px; font-size: 14px; color: var(--text-secondary); }
+@media (max-width: 860px) {
+  .search-btn { display: flex; }
+  .search-input { display: none; }
+  .search.open { position: static; }
+  .search.open .search-btn { display: none; }
+  .search.open .search-input { display: block; position: absolute; left: 16px; right: 16px; top: 12px; width: auto; z-index: 6; }
+  .search.open .search-list { position: fixed; left: 16px; right: 16px; top: calc(var(--topbar-h) + 4px); width: auto; }
+}
