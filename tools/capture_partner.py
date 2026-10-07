@@ -12,13 +12,10 @@ os.makedirs(OUT, exist_ok=True)
 def save(png_bytes, name):
     Image.open(io.BytesIO(png_bytes)).convert('RGB').save(os.path.join(OUT, name + '.webp'), 'WEBP', quality=88)
 
-def login_box(page, name):
+def login_full(page, name):
     page.add_style_tag(content='.login-demo{display:none!important}')
     page.evaluate("document.activeElement && document.activeElement.blur()")
-    box = page.locator('.login-box').bounding_box()
-    pad = 32
-    clip = {'x': max(box['x'] - pad, 0), 'y': max(box['y'] - pad, 0), 'width': box['width'] + pad * 2, 'height': box['height'] + pad * 2}
-    save(page.screenshot(clip=clip), name)
+    save(page.screenshot(), name)
 
 with sync_playwright() as p:
     b = p.chromium.launch()
@@ -26,7 +23,7 @@ with sync_playwright() as p:
         ctx = b.new_context(viewport={'width': w, 'height': 900}, device_scale_factor=2)
         page = ctx.new_page()
         page.goto(URL); page.wait_for_timeout(500)
-        login_box(page, 'login-' + label)
+        login_full(page, 'login-' + label)
         if label == 'pc':
             page.fill('#loginIdInput', 'bonsa'); page.fill('#loginPwInput', 'a1234')
             page.click('#loginSubmitBtn'); page.wait_for_timeout(800)
