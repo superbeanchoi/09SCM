@@ -79,7 +79,8 @@
   function shotsHTML(shots, caption) {
     if (!shots || !shots.length) { return ''; }
     var items = shots.map(function (s) {
-      return '<figure class="shot-item shot-' + s.device + '"><img src="' + s.src + '" alt="' + s.alt + '" loading="lazy"></figure>';
+      var grow = shots.length > 1 && s.ratio ? ' style="flex:' + Math.round(s.ratio * 1000) + ' 1 0%"' : '';
+      return '<figure class="shot-item shot-' + s.device + '"' + grow + '><img src="' + s.src + '" alt="' + s.alt + '" loading="lazy"></figure>';
     }).join('');
     return '<div class="shot"><div class="shot-row' + (shots.length > 1 ? ' shot-pair' : '') + '">' + items + '</div>' +
       (caption ? '<p class="shot-caption">' + caption + '</p>' : '') + '</div>';

@@ -301,13 +301,11 @@ details.guide-more[open] > summary { margin-bottom: 8px; }
 .shot-item { margin: 0; }
 .shot-item img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--surface, #fff); }
 .shot-caption { margin: 8px 0 0; font-size: 12px; font-weight: 300; color: var(--text-secondary); }
-.shot-pair { display: flex; gap: 16px; align-items: flex-end; }
+.shot-pair { display: flex; gap: 16px; align-items: flex-start; }
 .guide-section .shot-caption { margin: 8px 0 0; }
-.shot-pair .shot-pc { flex: 1 1 0; min-width: 0; }
-.shot-pair .shot-mobile { flex: 0 0 28%; min-width: 0; }
+.shot-pair .shot-item { min-width: 0; }
 @media (max-width: 860px) {
-  .shot-pair { flex-direction: column; align-items: stretch; }
-  .shot-pair .shot-mobile { flex: none; width: 60%; max-width: 280px; }
+  .shot-pair { gap: 10px; }
 }
 
 /* 본문 서식 */

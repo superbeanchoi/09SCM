@@ -82,8 +82,8 @@ window.GUIDE_CONTENT['start-terms'] = {
 
 window.GUIDE_CONTENT['dashboard-ops'] = {
   shots: [
-    { device: 'pc', src: '../assets/img/partner/dashboard-pc.webp', alt: '09SCM 대시보드 PC 화면' },
-    { device: 'mobile', src: '../assets/img/partner/dashboard-mobile.webp', alt: '09SCM 대시보드 모바일 화면' }
+    { device: 'pc', src: '../assets/img/partner/dashboard-pc.webp', alt: '09SCM 대시보드 PC 화면', ratio: 1440 / 1500 },
+    { device: 'mobile', src: '../assets/img/partner/dashboard-mobile.webp', alt: '09SCM 대시보드 모바일 화면', ratio: 440 / 1200 }
   ],
   shotCaption: '09SCM 대시보드 화면 (PC / 모바일)',
   overview:
