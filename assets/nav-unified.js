@@ -2,7 +2,7 @@
 // type 'page' = 시작하기 본문, 그 외 = 관리자 화면 하나
 window.GUIDE_NAV = [
   { id: 'start', label: '시작하기', children: [
-    { id: 'start-login', label: '로그인과 로그아웃', type: 'page' },
+    { id: 'start-login', label: '로그인' },
     { id: 'start-terms', label: '알아두면 좋은 용어', type: 'page' }
   ]},
   { id: 'dashboard', label: '대시보드', children: [

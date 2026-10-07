@@ -2,9 +2,8 @@
 // type 'page' = 시작하기 본문, 그 외 = 관리자 화면 하나
 window.GUIDE_NAV = [
     { id: 'start', label: '시작하기', children: [
-      { id: 'start-first', label: '처음 이용하기', type: 'page' },
-      { id: 'start-status', label: '이용상태와 사용 범위', type: 'page' },
-      { id: 'start-wholesale', label: '도매공급권한', type: 'page' },
+      { id: 'start-intro', label: '09SCM 관리자 소개', type: 'page' },
+      { id: 'start-login', label: '가입신청/로그인' },
       { id: 'start-terms', label: '알아두면 좋은 용어', type: 'page' }
     ]},
     { id: 'dashboard', label: '대시보드', children: [
